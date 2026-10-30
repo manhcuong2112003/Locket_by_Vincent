@@ -1,6 +1,8 @@
-name: Auto-Sign & Health Check iOS Portal (Game & Locket)
+name: Auto-Sign & Deploy iOS Portal (Game & Locket)
 
 on:
+  push:
+    branches: [ main ]
   schedule:
     # Tự động chạy mỗi 20 phút trên máy chủ GitHub (24/7 kể cả khi tắt PC)
     - cron: '*/20 * * * *'
@@ -8,6 +10,12 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages-and-sign"
+  cancel-in-progress: false
 
 jobs:
   sync-and-sign:
@@ -22,6 +30,7 @@ jobs:
           python-version: '3.12'
 
       - name: Run Dedicated Locket Signer & Game Signer + Portal Sync
+        if: github.event_name != 'push'
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
@@ -32,6 +41,7 @@ jobs:
           python3 sign_game.py
 
       - name: Commit and Push updated cache & HTML
+        if: github.event_name != 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -42,3 +52,15 @@ jobs:
           else
             echo "Không có thay đổi mới cần commit."
           fi
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload static site artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
