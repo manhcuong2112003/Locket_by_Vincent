@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30 11:37:52",
+  "updated_at": "2026-10-30 14:41:32",
   "last_error": null,
   "last_alert_sent_at": 0,
   "in_error_state": false,
@@ -64,36 +64,36 @@
       "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
       "source_page_url": "https://ipaomtk.com/locket-widget/download/",
       "remote_ipa_signature": "\"6ae0e318-56cdc66\"|Tue, 27 Oct 2026 17:44:56 GMT|91020390",
-      "updated_at": "2026-10-30 11:37:52",
+      "updated_at": "2026-10-30 14:41:32",
       "servers": [
         {
           "cert_id": "main/Beihang University.zip",
           "label": "Server 1 — Beihang University",
           "badge": "Khuyên dùng • Hỗ trợ App Group",
-          "manifest_url": "https://signtools.ipaomtk.com/output/Locket-Widget-IPAOMTK.com-signed-788b02be4b0a3095177e.plist",
-          "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fsigntools.ipaomtk.com%2Foutput%2FLocket-Widget-IPAOMTK.com-signed-788b02be4b0a3095177e.plist",
-          "ipa_url": "https://signtools.ipaomtk.com/output/Locket-Widget-IPAOMTK.com-signed-788b02be4b0a3095177e.ipa",
-          "signed_at": "2026-10-30 11:37:36",
+          "manifest_url": "https://signtools.ipaomtk.com/output/Locket-signed-f1c09b6ea04b33d7011f.plist",
+          "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fsigntools.ipaomtk.com%2Foutput%2FLocket-signed-f1c09b6ea04b33d7011f.plist",
+          "ipa_url": "https://signtools.ipaomtk.com/output/Locket-signed-f1c09b6ea04b33d7011f.ipa",
+          "signed_at": "2026-10-30 14:41:02",
           "status": "active"
         },
         {
           "cert_id": "main/RAKUTEN SECURITIES,INC.zip",
           "label": "Server 2 — Rakuten Securities",
           "badge": "Ổn định • Có WidgetKit Entitlement",
-          "manifest_url": "https://signtools.ipaomtk.com/output/Locket-Widget-IPAOMTK.com-signed-1bae74746f0250c2e94b.plist",
-          "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fsigntools.ipaomtk.com%2Foutput%2FLocket-Widget-IPAOMTK.com-signed-1bae74746f0250c2e94b.plist",
-          "ipa_url": "https://signtools.ipaomtk.com/output/Locket-Widget-IPAOMTK.com-signed-1bae74746f0250c2e94b.ipa",
-          "signed_at": "2026-10-30 11:37:44",
+          "manifest_url": "https://signtools.ipaomtk.com/output/Locket-signed-65d5aa37c34e6545f6b6.plist",
+          "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fsigntools.ipaomtk.com%2Foutput%2FLocket-signed-65d5aa37c34e6545f6b6.plist",
+          "ipa_url": "https://signtools.ipaomtk.com/output/Locket-signed-65d5aa37c34e6545f6b6.ipa",
+          "signed_at": "2026-10-30 14:41:18",
           "status": "active"
         },
         {
           "cert_id": "main/China Telecom Corporation Limited.zip",
           "label": "Server 3 — China Telecom",
           "badge": "Dự phòng • Chạy song song App Store",
-          "manifest_url": "https://signtools.ipaomtk.com/output/Locket-Widget-IPAOMTK.com-signed-4e3efcaf82b159749933.plist",
-          "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fsigntools.ipaomtk.com%2Foutput%2FLocket-Widget-IPAOMTK.com-signed-4e3efcaf82b159749933.plist",
-          "ipa_url": "https://signtools.ipaomtk.com/output/Locket-Widget-IPAOMTK.com-signed-4e3efcaf82b159749933.ipa",
-          "signed_at": "2026-10-30 11:37:52",
+          "manifest_url": "https://signtools.ipaomtk.com/output/Locket-signed-f0d5469a7984b4aecc65.plist",
+          "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fsigntools.ipaomtk.com%2Foutput%2FLocket-signed-f0d5469a7984b4aecc65.plist",
+          "ipa_url": "https://signtools.ipaomtk.com/output/Locket-signed-f0d5469a7984b4aecc65.ipa",
+          "signed_at": "2026-10-30 14:41:32",
           "status": "active"
         },
         {
@@ -103,7 +103,7 @@
           "manifest_url": "https://apps.apple.com/app/locket-widget/id1600525061",
           "install_url": "https://apps.apple.com/app/locket-widget/id1600525061",
           "ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
-          "signed_at": "2026-10-30 11:37:52",
+          "signed_at": "2026-10-30 14:41:32",
           "ocsp_status": "APPLE_OFFICIAL",
           "status": "active"
         }

@@ -319,13 +319,77 @@ def sync_to_shared_portal(cfg: dict, servers: list) -> None:
         print(f"[Locket Signer] Lưu ý khi đồng bộ sang {shared_name}: {e}")
 
 
-def run_once(local_patch: bool = False, patch_mode: str = "dual_clone") -> list:
+def check_manifest_alive(manifest_url: str) -> bool:
+    if not manifest_url or "Locket-signed-" not in manifest_url:
+        return False
+    try:
+        req = urllib.request.Request(
+            manifest_url,
+            headers={"User-Agent": "itunesstored/1.0 iOS/17.0 model/iPhone14,5"}
+        )
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            if resp.status != 200:
+                return False
+            body = resp.read().decode("utf-8", errors="ignore")
+            if "<plist" not in body or "software-package" not in body:
+                return False
+            m = re.search(r"<string>(https?://[^<]+\.ipa)</string>", body)
+            if m:
+                ipa_req = urllib.request.Request(
+                    m.group(1),
+                    headers={"User-Agent": "itunesstored/1.0 iOS/17.0", "Range": "bytes=0-63"}
+                )
+                with urllib.request.urlopen(ipa_req, timeout=12) as ipa_resp:
+                    return ipa_resp.status in (200, 206)
+            return True
+    except Exception:
+        return False
+
+
+def load_existing_patched_servers(cfg: dict) -> dict:
+    by_cert = {}
+    for fname in (cfg["app"].get("cache_file", "links_cache_locket.json"), cfg["app"].get("shared_cache_file", "links_cache.json")):
+        fpath = os.path.join(BASE_DIR, fname)
+        if os.path.exists(fpath):
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                srvs = data.get("servers", [])
+                if "apps" in data and cfg["app"]["id"] in data["apps"]:
+                    srvs = data["apps"][cfg["app"]["id"]].get("servers", srvs)
+                for s in srvs:
+                    cid = s.get("cert_id")
+                    murl = s.get("manifest_url", "")
+                    if cid and "Locket-signed-" in murl and cid not in by_cert:
+                        by_cert[cid] = s
+            except Exception:
+                pass
+    return by_cert
+
+
+def run_once(local_patch: bool = True, patch_mode: str = "clean", force: bool = False) -> list:
     cfg = load_config()
+    existing_by_cert = load_existing_patched_servers(cfg)
     servers = []
+    missing_certs = []
+
+    for cert in cfg["preferred_certificates"]:
+        cid = cert["id"]
+        existing = existing_by_cert.get(cid)
+        if not force and existing and check_manifest_alive(existing.get("manifest_url", "")):
+            print(f"[Locket Signer] ✔ Link đã patch của {cert['label']} đang hoạt động tốt: {existing['manifest_url']}")
+            servers.append({
+                **existing,
+                "cert_id": cid,
+                "label": cert["label"],
+                "badge": cert["badge"]
+            })
+        else:
+            missing_certs.append(cert)
 
     patched_info = None
     tmp_dir = None
-    if local_patch:
+    if local_patch and missing_certs:
         tmp_dir = tempfile.mkdtemp(prefix="locket_patch_")
         raw_ipa = os.path.join(tmp_dir, "Locket-Original.ipa")
         out_ipa = os.path.join(tmp_dir, "Locket.ipa")
@@ -336,7 +400,7 @@ def run_once(local_patch: bool = False, patch_mode: str = "dual_clone") -> list:
         patched_info = patch_locket_ipa(raw_ipa, out_ipa, cfg, mode=patch_mode)
 
     try:
-        for cert in cfg["preferred_certificates"]:
+        for cert in missing_certs:
             try:
                 print(f"[Locket Signer] ⏳ Đang ký {cfg['app']['name']} với {cert['label']}...")
                 if patched_info:
@@ -398,8 +462,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--mode",
         choices=["dual_clone", "smart_widget", "clean"],
-        default="dual_clone",
+        default="clean",
         help="Chế độ xử lý IPA: dual_clone (chạy song song App Store để giữ Widget 100%%), smart_widget (giữ LocketWidgetExtension.appex), clean (gỡ toàn bộ .appex)"
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Bắt buộc đóng gói và ký mới lại toàn bộ các Server"
+    )
     args = parser.parse_args()
-    run_once(local_patch=args.local_patch, patch_mode=args.mode)
+    run_once(local_patch=True, patch_mode=args.mode, force=args.force)
