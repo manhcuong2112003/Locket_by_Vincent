@@ -37,6 +37,11 @@
       "main/Beihang University.zip": "group.cn.edu.buaa.wxwork",
       "main/RAKUTEN SECURITIES,INC.zip": "group.dev.co.jp.rakuten-sec.ispeed.widgetapp"
     },
+    "certificate_team_ids": {
+      "main/Beihang University.zip": "ZXB3TS7QD4",
+      "main/RAKUTEN SECURITIES,INC.zip": "HWK767YYMF",
+      "main/China Telecom Corporation Limited.zip": "JSVM68ZU8Z"
+    },
     "sync_google_service_plist": true,
     "timeout_seconds": 240
   },

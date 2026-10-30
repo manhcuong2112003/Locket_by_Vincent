@@ -158,7 +158,30 @@ def patch_locket_ipa(
                     plistlib.dump(gs_data, f)
                 print(f"[Locket Patcher] Đã đồng bộ GoogleService-Info.plist: BUNDLE_ID = {final_bundle_id}")
 
-        # 4. Đóng gói lại thành file IPA sạch
+        # 4. Chuyển hướng selector vùng nhớ App Group sang thư mục Sandbox nội bộ & đồng bộ Team ID Keychain
+        exec_path = os.path.join(app_path, "Locket")
+        if os.path.isfile(exec_path):
+            with open(exec_path, "rb") as f:
+                bin_data = f.read()
+
+            old_sel = b"containerURLForSecurityApplicationGroupIdentifier:\x00"
+            new_sel = b"temporaryDirectory\x00".ljust(len(old_sel), b"\x00")
+            if old_sel in bin_data:
+                bin_data = bin_data.replace(old_sel, new_sel)
+                print("[Locket Patcher] Đã chuyển hướng App Group Container sang Sandbox nội bộ (chống văng nil containerURL).")
+
+            team_id = spec.get("certificate_team_ids", {}).get(cert_id, "")
+            if team_id and len(team_id) == 10:
+                old_team = b"SWD4AZY4KG."
+                new_team = f"{team_id}.".encode("ascii")
+                if old_team in bin_data:
+                    bin_data = bin_data.replace(old_team, new_team)
+                    print(f"[Locket Patcher] Đã đồng bộ Keychain Access Group Team ID = {team_id}")
+
+            with open(exec_path, "wb") as f:
+                f.write(bin_data)
+
+        # 5. Đóng gói lại thành file IPA sạch
         with zipfile.ZipFile(output_ipa_path, "w", zipfile.ZIP_DEFLATED) as zout:
             for root, _, files in os.walk(tmpdir):
                 for file in files:
@@ -387,24 +410,24 @@ def run_once(local_patch: bool = True, patch_mode: str = "clean", force: bool = 
         else:
             missing_certs.append(cert)
 
-    patched_info = None
+    raw_ipa = None
     tmp_dir = None
     if local_patch and missing_certs:
         tmp_dir = tempfile.mkdtemp(prefix="locket_patch_")
         raw_ipa = os.path.join(tmp_dir, "Locket-Original.ipa")
-        out_ipa = os.path.join(tmp_dir, "Locket.ipa")
         print(f"[Locket Signer] ⬇️ Đang tải IPA gốc từ {cfg['app']['remote_ipa_url']}...")
         req = urllib.request.Request(cfg["app"]["remote_ipa_url"], headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=180) as resp, open(raw_ipa, "wb") as out_f:
             shutil.copyfileobj(resp, out_f)
-        patched_info = patch_locket_ipa(raw_ipa, out_ipa, cfg, mode=patch_mode)
 
     try:
         for cert in missing_certs:
             try:
                 print(f"[Locket Signer] ⏳ Đang ký {cfg['app']['name']} với {cert['label']}...")
-                if patched_info:
+                if raw_ipa and os.path.isfile(raw_ipa):
                     try:
+                        out_ipa = os.path.join(tmp_dir, "Locket.ipa")
+                        patched_info = patch_locket_ipa(raw_ipa, out_ipa, cfg, mode=patch_mode, cert_id=cert["id"])
                         res = upload_and_sign_patched_ipa(cfg, patched_info, cert["id"])
                     except Exception as up_err:
                         print(f"[Locket Signer] ⚠️ Upload IPA patch thất bại ({up_err}), chuyển sang Remote Sign...")
