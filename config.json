@@ -1,42 +1,12 @@
 {
   "app": {
-    "name": "Shadowrocket",
-    "version": "2.2.92",
-    "build": "3445",
-    "remote_ipa_url": "https://file.ipaomtk.com/Shadowrocket/Shadowrocket-IPAOMTK.COM.ipa",
-    "local_ipa_path": "Shadowrocket-IPAOMTK.COM.ipa",
+    "name": "Locket & Game Portal",
+    "version": "2.70.0",
     "dns_profile_url": "./Vincent-DNS.mobileconfig",
-    "fallback_3utools_plist": "https://dl.3u.com/plist/2026/09/08/1788829540721_622855.plist",
-    "html_file": "Shadowrocket – Cài đặt.html",
+    "html_file": "index.html",
     "cache_file": "links_cache.json"
   },
   "catalog": [
-    {
-      "id": "shadowrocket",
-      "name": "Shadowrocket",
-      "category": "app",
-      "tag_vi": "Tiện ích VPN",
-      "tag_en": "VPN Utility",
-      "version": "2.2.92",
-      "size": "22.5 MB",
-      "subtitle_vi": "Proxy & VPN Chuyên Nghiệp • Không cần Apple ID & PC",
-      "subtitle_en": "Proxy & VPN Utility • No Apple ID or PC required",
-      "features_vi": [
-        "Có Server 1 Bản Chính Hãng Apple (Không cần DNS, cài ăn ngay)",
-        "Hỗ trợ đầy đủ cấu hình Proxy, VPN, Đổi vùng & Chặn quảng cáo",
-        "Tự động quét và cập nhật khi có phiên bản mới"
-      ],
-      "features_en": [
-        "Includes Official Apple Server 1 (No DNS needed, zero verify errors)",
-        "Full Proxy, VPN, Packet Tunnel & Ad-block rules support",
-        "Auto-scans and updates on upstream release"
-      ],
-      "icon": "./Shadowrocket – Cài đặt_files/shadowrocket.png",
-      "source_page_url": "https://ipaomtk.com/shadowrocket/download/",
-      "remote_ipa_url": "https://file.ipaomtk.com/Shadowrocket/Shadowrocket-IPAOMTK.COM.ipa",
-      "local_ipa_path": "Shadowrocket-IPAOMTK.COM.ipa",
-      "fallback_3utools_plist": "https://dl.3u.com/plist/2026/09/08/1788829540721_622855.plist"
-    },
     {
       "id": "locket-widget",
       "name": "Locket Widget",
