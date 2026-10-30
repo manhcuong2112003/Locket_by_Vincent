@@ -8,7 +8,8 @@
     "remote_ipa_url": "https://file.ipaomtk.com/Asphalt-8-Airborne/Asphalt-8-IPAOMTK.COM.ipa",
     "source_page_url": "https://ipaomtk.com/asphalt-8-ipa/download/",
     "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Asphalt-8-Airborne--300x300.jpg",
-    "cache_file": "links_cache_game.json"
+    "cache_file": "links_cache_game.json",
+    "shared_cache_file": "links_cache.json"
   },
   "signing_spec": {
     "mode": "remote_api",
@@ -26,18 +27,18 @@
   "preferred_certificates": [
     {
       "id": "main/Beihang University.zip",
-      "label": "Server 1 ? Beihang University",
-      "badge": "Khuy?n d?ng ? ?? tin c?y tr?n m?y"
+      "label": "Server 1 — Beihang University",
+      "badge": "Khuyên dùng • Đã tin cậy trên máy"
     },
     {
       "id": "main/RAKUTEN SECURITIES,INC.zip",
-      "label": "Server 2 ? Rakuten Securities",
-      "badge": "?n ??nh ? T?c ?? cao"
+      "label": "Server 2 — Rakuten Securities",
+      "badge": "Ổn định • Tốc độ cao"
     },
     {
       "id": "main/China Telecom Corporation Limited.zip",
-      "label": "Server 3 ? China Telecom",
-      "badge": "D? ph?ng"
+      "label": "Server 3 — China Telecom",
+      "badge": "Dự phòng"
     }
   ]
 }

@@ -393,7 +393,7 @@ def update_html_file(cfg: dict, cache_data: dict) -> None:
     embedded_json = json.dumps({
         "updated_at": cache_data.get("updated_at"),
         "dns_url": cfg["app"]["dns_profile_url"],
-        "fallback_3u_url": f"itms-services://?action=download-manifest&url={urllib.parse.quote(cfg['app']['fallback_3utools_plist'], safe='')}",
+        "fallback_3u_url": f"itms-services://?action=download-manifest&url={urllib.parse.quote(cfg['app'].get('fallback_3utools_plist', ''), safe='')}" if cfg["app"].get("fallback_3utools_plist") else "",
         "apps": cache_data.get("apps", {}),
         "servers": cache_data.get("servers", [])
     }, ensure_ascii=False)
@@ -640,6 +640,19 @@ def run_sync(force_resign: bool = False) -> bool:
         if apple_server:
             item_servers.append(apple_server)
         item_servers.extend(enterprise_servers)
+        if app_id == "locket-widget":
+            appstore_url = "https://apps.apple.com/app/locket-widget/id1600525061"
+            item_servers.append({
+                "cert_id": "apple_appstore_official",
+                "label": "Bản Gốc App Store (Giữ Widget 100%)",
+                "badge": "Chính chủ Apple • Hiện Widget Màn hình khóa",
+                "manifest_url": appstore_url,
+                "install_url": appstore_url,
+                "ipa_url": item.get("remote_ipa_url", ""),
+                "signed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "ocsp_status": "APPLE_OFFICIAL",
+                "status": "active"
+            })
 
         for idx, srv in enumerate(item_servers, start=1):
             clean_title = re.sub(r"^Server\s+\d+\s+—\s+", "", srv["label"])

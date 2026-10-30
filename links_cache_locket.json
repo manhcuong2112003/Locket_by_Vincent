@@ -1,0 +1,62 @@
+{
+  "updated_at": "2026-10-30 11:37:52",
+  "app": {
+    "id": "locket-widget",
+    "name": "Locket Widget",
+    "clone_name": "Locket Gold",
+    "category": "app",
+    "bundle_id": "com.locket.Locket",
+    "clone_bundle_id": "com.locket.Locket.gold",
+    "appstore_url": "https://apps.apple.com/app/locket-widget/id1600525061",
+    "version": "2.70.0",
+    "size": "86.8 MB",
+    "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
+    "source_page_url": "https://ipaomtk.com/locket-widget/download/",
+    "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Locket-Widget-300x300.jpg",
+    "cache_file": "links_cache_locket.json",
+    "shared_cache_file": "links_cache.json"
+  },
+  "servers": [
+    {
+      "cert_id": "main/Beihang University.zip",
+      "label": "Server 1 — Beihang University",
+      "badge": "Khuyên dùng • Hỗ trợ App Group",
+      "manifest_url": "https://signtools.ipaomtk.com/output/Locket-Widget-IPAOMTK.com-signed-788b02be4b0a3095177e.plist",
+      "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fsigntools.ipaomtk.com%2Foutput%2FLocket-Widget-IPAOMTK.com-signed-788b02be4b0a3095177e.plist",
+      "ipa_url": "https://signtools.ipaomtk.com/output/Locket-Widget-IPAOMTK.com-signed-788b02be4b0a3095177e.ipa",
+      "signed_at": "2026-10-30 11:37:36",
+      "status": "active"
+    },
+    {
+      "cert_id": "main/RAKUTEN SECURITIES,INC.zip",
+      "label": "Server 2 — Rakuten Securities",
+      "badge": "Ổn định • Có WidgetKit Entitlement",
+      "manifest_url": "https://signtools.ipaomtk.com/output/Locket-Widget-IPAOMTK.com-signed-1bae74746f0250c2e94b.plist",
+      "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fsigntools.ipaomtk.com%2Foutput%2FLocket-Widget-IPAOMTK.com-signed-1bae74746f0250c2e94b.plist",
+      "ipa_url": "https://signtools.ipaomtk.com/output/Locket-Widget-IPAOMTK.com-signed-1bae74746f0250c2e94b.ipa",
+      "signed_at": "2026-10-30 11:37:44",
+      "status": "active"
+    },
+    {
+      "cert_id": "main/China Telecom Corporation Limited.zip",
+      "label": "Server 3 — China Telecom",
+      "badge": "Dự phòng • Chạy song song App Store",
+      "manifest_url": "https://signtools.ipaomtk.com/output/Locket-Widget-IPAOMTK.com-signed-4e3efcaf82b159749933.plist",
+      "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fsigntools.ipaomtk.com%2Foutput%2FLocket-Widget-IPAOMTK.com-signed-4e3efcaf82b159749933.plist",
+      "ipa_url": "https://signtools.ipaomtk.com/output/Locket-Widget-IPAOMTK.com-signed-4e3efcaf82b159749933.ipa",
+      "signed_at": "2026-10-30 11:37:52",
+      "status": "active"
+    },
+    {
+      "cert_id": "apple_appstore_official",
+      "label": "Server 4 — Bản Gốc App Store (Giữ Widget 100%)",
+      "badge": "Chính chủ Apple • Hiện Widget Màn hình khóa",
+      "manifest_url": "https://apps.apple.com/app/locket-widget/id1600525061",
+      "install_url": "https://apps.apple.com/app/locket-widget/id1600525061",
+      "ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
+      "signed_at": "2026-10-30 11:37:52",
+      "ocsp_status": "APPLE_OFFICIAL",
+      "status": "active"
+    }
+  ]
+}

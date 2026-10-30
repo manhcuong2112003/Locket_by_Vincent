@@ -2,49 +2,66 @@
   "app": {
     "id": "locket-widget",
     "name": "Locket Widget",
+    "clone_name": "Locket Gold",
     "category": "app",
     "bundle_id": "com.locket.Locket",
+    "clone_bundle_id": "com.locket.Locket.gold",
+    "appstore_url": "https://apps.apple.com/app/locket-widget/id1600525061",
     "version": "2.70.0",
     "size": "86.8 MB",
     "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
     "source_page_url": "https://ipaomtk.com/locket-widget/download/",
     "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Locket-Widget-300x300.jpg",
-    "cache_file": "links_cache_locket.json"
+    "cache_file": "links_cache_locket.json",
+    "shared_cache_file": "links_cache.json"
   },
   "signing_spec": {
-    "mode": "local_patch_and_sign",
-    "preserve_original_bundle_id": true,
-    "strip_plugins_appex": true,
+    "mode": "hybrid_dual_and_smart_patch",
+    "patch_strategy": "smart_widget_or_clone",
+    "preserve_widget_extensions": [
+      "LocketWidgetExtension.appex",
+      "LocketWidgetIntent.appex",
+      "LocketWidgetIntentUI.appex"
+    ],
+    "strip_crash_extensions": [
+      "LocketNotificationServiceExtension.appex",
+      "LocketWidgetLocationExtension.appex"
+    ],
     "strip_incompatible_entitlements": [
-      "com.apple.security.application-groups",
       "com.apple.developer.associated-domains",
       "aps-environment",
       "com.apple.developer.icloud-services",
       "com.apple.developer.icloud-container-identifiers"
     ],
-    "sync_google_service_plist": true
+    "certificate_app_groups": {
+      "main/Beihang University.zip": "group.cn.edu.buaa.wxwork",
+      "main/RAKUTEN SECURITIES,INC.zip": "group.dev.co.jp.rakuten-sec.ispeed.widgetapp"
+    },
+    "sync_google_service_plist": true,
+    "timeout_seconds": 240
   },
   "signtools_api": {
     "base_url": "https://signtools.ipaomtk.com",
     "certificates_endpoint": "https://signtools.ipaomtk.com/server-certificates.php",
     "remote_sign_start": "https://signtools.ipaomtk.com/remote-sign-start.php",
-    "remote_sign_status": "https://signtools.ipaomtk.com/remote-sign-status.php"
+    "remote_sign_status": "https://signtools.ipaomtk.com/remote-sign-status.php",
+    "local_sign_merge": "https://signtools.ipaomtk.com/sign-merge.php"
   },
   "preferred_certificates": [
     {
       "id": "main/Beihang University.zip",
-      "label": "Server 1 ? Beihang University",
-      "badge": "Khuy?n d?ng ? ?? tin c?y tr?n m?y"
+      "label": "Server 1 — Beihang University",
+      "badge": "Khuyên dùng • Hỗ trợ App Group"
     },
     {
       "id": "main/RAKUTEN SECURITIES,INC.zip",
-      "label": "Server 2 ? Rakuten Securities",
-      "badge": "D? ph?ng 1"
+      "label": "Server 2 — Rakuten Securities",
+      "badge": "Ổn định • Có WidgetKit Entitlement"
     },
     {
       "id": "main/China Telecom Corporation Limited.zip",
-      "label": "Server 3 ? China Telecom",
-      "badge": "D? ph?ng 2"
+      "label": "Server 3 — China Telecom",
+      "badge": "Dự phòng • Chạy song song App Store"
     }
   ]
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Web Server phục vụ trang cài đặt Shadowrocket (v2.2.92)
+Web Server phục vụ trang cài đặt Locket Widget & Game iOS
 tích hợp sẵn tiến trình ngầm tự động kiểm tra & gia hạn chứng chỉ (Auto-Sign Daemon).
 """
 
@@ -45,7 +45,7 @@ def background_monitor_loop() -> None:
         time.sleep(interval)
 
 
-class ShadowrocketHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+class PortalHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=BASE_DIR, **kwargs)
 
@@ -54,7 +54,7 @@ class ShadowrocketHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         path = urllib.parse.unquote(parsed.path)
 
         if path in ("/", "/index.html"):
-            self.path = "/" + urllib.parse.quote("Shadowrocket – Cài đặt.html")
+            self.path = "/index.html"
             return super().do_GET()
 
         if path == "/api/status":
@@ -87,11 +87,10 @@ if __name__ == "__main__":
     monitor_thread = threading.Thread(target=background_monitor_loop, daemon=True)
     monitor_thread.start()
 
-    with ThreadedHTTPServer(("0.0.0.0", PORT), ShadowrocketHTTPRequestHandler) as httpd:
+    with ThreadedHTTPServer(("0.0.0.0", PORT), PortalHTTPRequestHandler) as httpd:
         auto_sign_manager.log("==========================================================")
         auto_sign_manager.log(f"🌐 WEB SERVER ĐÃ BẬT THÀNH CÔNG TẠI CỔNG {PORT}!")
         auto_sign_manager.log(f"👉 Truy cập trên máy tính: http://localhost:{PORT}")
         auto_sign_manager.log(f"📱 Truy cập trên iPhone (cùng Wi-Fi): http://{lan_ip}:{PORT}")
         auto_sign_manager.log("==========================================================")
         httpd.serve_forever()
-
