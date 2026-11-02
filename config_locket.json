@@ -14,8 +14,8 @@
     "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Locket-Widget-300x300.jpg",
     "cache_file": "links_cache_locket.json",
     "shared_cache_file": "links_cache.json",
-    "github_repo": "manhcuong2112003/vmctrick",
-    "github_pages_base": "https://manhcuong2112003.github.io/vmctrick",
+    "github_repo": "manhcuong2112003/Locket_by_Vincent",
+    "github_pages_base": "https://manhcuong2112003.github.io/Locket_by_Vincent",
     "release_tag": "v1.0-signed"
   },
   "signing_spec": {

@@ -262,9 +262,9 @@ def sign_with_zsign(
     if res.returncode != 0 or not os.path.isfile(signed_ipa_path):
         raise RuntimeError(f"zsign thất bại ({res.returncode}): {res.stderr or res.stdout}")
 
-    repo = cfg["app"].get("github_repo", "manhcuong2112003/vmctrick")
+    repo = cfg["app"].get("github_repo", "manhcuong2112003/Locket_by_Vincent")
     release_tag = cfg["app"].get("release_tag", "v1.0-signed")
-    pages_base = cfg["app"].get("github_pages_base", f"https://manhcuong2112003.github.io/vmctrick").rstrip("/")
+    pages_base = cfg["app"].get("github_pages_base", "https://manhcuong2112003.github.io/Locket_by_Vincent").rstrip("/")
 
     ipa_url = upload_to_github_release(signed_ipa_path, release_tag, repo)
 
@@ -390,9 +390,9 @@ def run_once(force: bool = False) -> list:
         zsign_bin = shutil.which("zsign")
         if not zsign_bin:
             print("[Locket ZSign] ℹ️ Máy hiện tại chưa có binary `zsign`. Sẽ tạo sẵn manifest.plist và thực thi ký tự động trên GitHub Actions Runner.")
-            repo = cfg["app"].get("github_repo", "manhcuong2112003/vmctrick")
+            repo = cfg["app"].get("github_repo", "manhcuong2112003/Locket_by_Vincent")
             release_tag = cfg["app"].get("release_tag", "v1.0-signed")
-            pages_base = cfg["app"].get("github_pages_base", "https://manhcuong2112003.github.io/vmctrick").rstrip("/")
+            pages_base = cfg["app"].get("github_pages_base", "https://manhcuong2112003.github.io/Locket_by_Vincent").rstrip("/")
             fixed_bundle_id = cfg["signing_spec"].get("fixed_bundle_id", "com.locket.Locket")
             version = cfg["app"].get("version", "2.71.0")
 

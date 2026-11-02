@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-02 11:07:05",
+  "updated_at": "2026-11-02 11:26:38",
   "app": {
     "id": "locket-widget",
     "name": "Locket Gold",
@@ -15,8 +15,8 @@
     "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Locket-Widget-300x300.jpg",
     "cache_file": "links_cache_locket.json",
     "shared_cache_file": "links_cache.json",
-    "github_repo": "manhcuong2112003/vmctrick",
-    "github_pages_base": "https://manhcuong2112003.github.io/vmctrick",
+    "github_repo": "manhcuong2112003/Locket_by_Vincent",
+    "github_pages_base": "https://manhcuong2112003.github.io/Locket_by_Vincent",
     "release_tag": "v1.0-signed"
   },
   "servers": [
@@ -24,30 +24,30 @@
       "cert_id": "main/Beihang University.zip",
       "label": "Server 1 — Beihang University (ZSign Gold)",
       "badge": "Khuyên dùng • Locket Gold Chuẩn Bundle ID gốc",
-      "manifest_url": "https://manhcuong2112003.github.io/vmctrick/manifests/locket-beihang.plist",
-      "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2Fvmctrick%2Fmanifests%2Flocket-beihang.plist",
-      "ipa_url": "https://github.com/manhcuong2112003/vmctrick/releases/download/v1.0-signed/LocketGold-beihang.ipa",
-      "signed_at": "2026-11-02 11:07:05",
+      "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-beihang.plist",
+      "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-beihang.plist",
+      "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-beihang.ipa",
+      "signed_at": "2026-11-02 11:26:38",
       "status": "active"
     },
     {
       "cert_id": "main/RAKUTEN SECURITIES,INC.zip",
       "label": "Server 2 — Rakuten Securities (ZSign Gold)",
       "badge": "Ổn định • Locket Gold Chuẩn Bundle ID gốc",
-      "manifest_url": "https://manhcuong2112003.github.io/vmctrick/manifests/locket-rakuten.plist",
-      "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2Fvmctrick%2Fmanifests%2Flocket-rakuten.plist",
-      "ipa_url": "https://github.com/manhcuong2112003/vmctrick/releases/download/v1.0-signed/LocketGold-rakuten.ipa",
-      "signed_at": "2026-11-02 11:07:05",
+      "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-rakuten.plist",
+      "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-rakuten.plist",
+      "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-rakuten.ipa",
+      "signed_at": "2026-11-02 11:26:38",
       "status": "active"
     },
     {
       "cert_id": "main/China Telecom Corporation Limited.zip",
       "label": "Server 3 — China Telecom (ZSign Gold)",
       "badge": "Dự phòng • Locket Gold Chuẩn Bundle ID gốc",
-      "manifest_url": "https://manhcuong2112003.github.io/vmctrick/manifests/locket-chinatelecom.plist",
-      "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2Fvmctrick%2Fmanifests%2Flocket-chinatelecom.plist",
-      "ipa_url": "https://github.com/manhcuong2112003/vmctrick/releases/download/v1.0-signed/LocketGold-chinatelecom.ipa",
-      "signed_at": "2026-11-02 11:07:05",
+      "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-chinatelecom.plist",
+      "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-chinatelecom.plist",
+      "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-chinatelecom.ipa",
+      "signed_at": "2026-11-02 11:26:38",
       "status": "active"
     }
   ]
