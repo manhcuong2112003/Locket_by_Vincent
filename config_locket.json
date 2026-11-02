@@ -1,53 +1,37 @@
 {
   "app": {
     "id": "locket-widget",
-    "name": "Locket Widget",
+    "name": "Locket Gold",
     "clone_name": "Locket Gold",
     "category": "app",
     "bundle_id": "com.locket.Locket",
-    "clone_bundle_id": "com.locket.Locket.gold",
+    "clone_bundle_id": "com.locket.Locket",
     "appstore_url": "https://apps.apple.com/app/locket-widget/id1600525061",
-    "version": "2.70.0",
+    "version": "2.71.0",
     "size": "86.8 MB",
     "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
     "source_page_url": "https://ipaomtk.com/locket-widget/download/",
     "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Locket-Widget-300x300.jpg",
     "cache_file": "links_cache_locket.json",
-    "shared_cache_file": "links_cache.json"
+    "shared_cache_file": "links_cache.json",
+    "github_repo": "manhcuong2112003/vmctrick",
+    "github_pages_base": "https://manhcuong2112003.github.io/vmctrick",
+    "release_tag": "v1.0-signed"
   },
   "signing_spec": {
-    "mode": "hybrid_dual_and_smart_patch",
-    "patch_strategy": "smart_widget_or_clone",
-    "preserve_widget_extensions": [
-      "LocketWidgetExtension.appex",
-      "LocketWidgetIntent.appex",
-      "LocketWidgetIntentUI.appex"
+    "mode": "zsign_self_hosted",
+    "fixed_bundle_id": "com.locket.Locket",
+    "remove_plugins_appex": true,
+    "preserve_tweaks": [
+      "AutoRcSideload.dylib",
+      "blatantsPatch.dylib"
     ],
-    "strip_crash_extensions": [
-      "LocketNotificationServiceExtension.appex",
-      "LocketWidgetLocationExtension.appex"
-    ],
-    "strip_incompatible_entitlements": [
-      "com.apple.developer.associated-domains",
-      "aps-environment",
-      "com.apple.developer.icloud-services",
-      "com.apple.developer.icloud-container-identifiers"
-    ],
-    "certificate_app_groups": {
-      "main/Beihang University.zip": "group.cn.edu.buaa.wxwork",
-      "main/RAKUTEN SECURITIES,INC.zip": "group.dev.co.jp.rakuten-sec.ispeed.widgetapp"
-    },
-    "certificate_team_ids": {
-      "main/Beihang University.zip": "ZXB3TS7QD4",
-      "main/RAKUTEN SECURITIES,INC.zip": "HWK767YYMF",
-      "main/China Telecom Corporation Limited.zip": "JSVM68ZU8Z"
-    },
-    "sync_google_service_plist": true,
     "timeout_seconds": 240
   },
   "signtools_api": {
     "base_url": "https://signtools.ipaomtk.com",
     "certificates_endpoint": "https://signtools.ipaomtk.com/server-certificates.php",
+    "certificate_download_endpoint": "https://signtools.ipaomtk.com/server-certificate-download.php",
     "remote_sign_start": "https://signtools.ipaomtk.com/remote-sign-start.php",
     "remote_sign_status": "https://signtools.ipaomtk.com/remote-sign-status.php",
     "local_sign_merge": "https://signtools.ipaomtk.com/sign-merge.php"
@@ -55,18 +39,30 @@
   "preferred_certificates": [
     {
       "id": "main/Beihang University.zip",
-      "label": "Server 1 — Beihang University",
-      "badge": "Khuyên dùng • Hỗ trợ App Group"
+      "slug": "beihang",
+      "label": "Server 1 — Beihang University (ZSign Gold)",
+      "badge": "Khuyên dùng • Locket Gold Chuẩn Bundle ID gốc",
+      "p12": "certs/beihang/cert.p12",
+      "mobileprovision": "certs/beihang/cert.mobileprovision",
+      "password": "AppleP12.com"
     },
     {
       "id": "main/RAKUTEN SECURITIES,INC.zip",
-      "label": "Server 2 — Rakuten Securities",
-      "badge": "Ổn định • Có WidgetKit Entitlement"
+      "slug": "rakuten",
+      "label": "Server 2 — Rakuten Securities (ZSign Gold)",
+      "badge": "Ổn định • Locket Gold Chuẩn Bundle ID gốc",
+      "p12": "certs/rakuten/cert.p12",
+      "mobileprovision": "certs/rakuten/cert.mobileprovision",
+      "password": "AppleP12.com"
     },
     {
       "id": "main/China Telecom Corporation Limited.zip",
-      "label": "Server 3 — China Telecom",
-      "badge": "Dự phòng • Chạy song song App Store"
+      "slug": "chinatelecom",
+      "label": "Server 3 — China Telecom (ZSign Gold)",
+      "badge": "Dự phòng • Locket Gold Chuẩn Bundle ID gốc",
+      "p12": "certs/chinatelecom/cert.p12",
+      "mobileprovision": "certs/chinatelecom/cert.mobileprovision",
+      "password": "AppleP12.com"
     }
   ]
 }

@@ -1,23 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Trình xử lý & ký chuyên biệt cho LOCKET WIDGET (com.locket.Locket)
-Giải quyết triệt để bài toán: Vừa chống văng App trên chứng chỉ doanh nghiệp, vừa giữ được Widget ngoài Màn hình khóa/chính!
-
-Hỗ trợ 3 chế độ xử lý (tùy chọn qua --mode hoặc config_locket.json):
-1. Chế độ "dual_clone" (Khuyên dùng số 1 — Có Widget 100% + Không bao giờ văng):
-   - Đóng gói bản IPA thành "Locket Gold" (Bundle ID: com.locket.Locket.gold) để cài SONG SONG với Locket chính chủ từ App Store (com.locket.Locket).
-   - Gỡ bỏ các .appex gây xung đột trong bản IPA, đồng bộ GoogleService-Info.plist trùng khớp tuyệt đối với Bundle ID sau khi ký.
-   - Bản App Store đảm nhiệm hiển thị Widget Màn hình khóa & Màn hình chính chính chủ Apple (100% không lỗi), bản Locket Gold đảm nhiệm chụp/đăng ảnh từ thư viện & tính năng VIP!
-2. Chế độ "smart_widget" (Giữ LocketWidgetExtension.appex trên Chứng chỉ có App Group như Beihang / Rakuten):
-   - Chỉ xóa 2 extension phụ gây crash ngầm (LocketNotificationServiceExtension.appex, LocketWidgetLocationExtension.appex).
-   - Giữ nguyên LocketWidgetExtension.appex, LocketWidgetIntent.appex, LocketWidgetIntentUI.appex.
-   - Tự động tính toán chính xác Bundle ID đầu ra của signtools (<bundle>.<sanitized_filename>) và đồng bộ đồng loạt:
-     + Payload/Locket.app/Info.plist -> CFBundleIdentifier
-     + Payload/Locket.app/GoogleService-Info.plist -> BUNDLE_ID
-     + Payload/Locket.app/PlugIns/*.appex/Info.plist -> <MainBundleID>.<ExtensionSuffix>
-     + Payload/Locket.app/PlugIns/*.appex/GoogleService-Info.plist -> BUNDLE_ID
-3. Chế độ "clean" (Gỡ toàn bộ PlugIns/*.appex để mở độc lập nhanh, nhẹ, chống văng tuyệt đối).
+Trình xử lý & ký tự chủ (Self-Hosted ZSign) chuyên biệt cho LOCKET GOLD (com.locket.Locket)
+Thực thi đúng kiến trúc tại PLAN.md:
+1. Tận dụng nguồn IPA Locket Gold đã giải mã DRM và tích hợp sẵn:
+   - Payload/Locket.app/Frameworks/AutoRcSideload.dylib (Mở khóa Locket Gold)
+   - Payload/Locket.app/Frameworks/blatantsPatch.dylib (Tự động hook App Group & Keychain chống văng)
+2. Gỡ bỏ thư mục Payload/Locket.app/PlugIns/*.appex để tránh xung đột chứng chỉ Enterprise.
+3. Tuyệt đối KHÔNG qua signtools.ipaomtk.com (tránh bị tiêm IPAOMTK-real.dylib và bị đổi Bundle ID).
+4. Ký sạch đệ quy toàn bộ Frameworks/*.dylib và Locket.app bằng `zsign` với cố định Bundle ID gốc:
+   com.locket.Locket
+5. Phát hành IPA lên GitHub Releases + tạo manifest.plist OTA tĩnh trên GitHub Pages.
 """
 
 import argparse
@@ -27,6 +20,7 @@ import os
 import plistlib
 import re
 import shutil
+import subprocess
 import tempfile
 import time
 import urllib.parse
@@ -35,6 +29,9 @@ import zipfile
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(BASE_DIR, "config_locket.json")
+MANIFESTS_DIR = os.path.join(BASE_DIR, "manifests")
+CERTS_DIR = os.path.join(BASE_DIR, "certs")
+
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
     "Origin": "https://signtools.ipaomtk.com",
@@ -47,42 +44,66 @@ def load_config() -> dict:
         return json.load(f)
 
 
-def compute_signtools_final_bundle_id(bundle_param: str, ipa_filename: str) -> str:
+def ensure_certificate_files(cfg: dict, cert: dict) -> tuple[str, str, str]:
     """
-    Máy chủ signtools.ipaomtk.com tự động nối thêm hậu tố tên file IPA đã làm sạch
-    vào sau tham số `bundle` (VD: bundle='com.locket.Locket' + file='Locket-Widget-IPAOMTK.com.ipa'
-    -> 'com.locket.Locket.locketwidgetipaomtkcom').
-    Hàm này tính chính xác CFBundleIdentifier cuối cùng để đồng bộ GoogleService-Info.plist khớp 100%.
+    Đảm bảo bộ file .p12 và .mobileprovision của chứng chỉ luôn sẵn sàng trong thư mục certs/<slug>/.
+    Nếu chưa có trên đĩa, tự động tải gói .zip từ endpoint chứng chỉ và giải nén.
     """
-    stem = re.sub(r"\.ipa$", "", os.path.basename(ipa_filename), flags=re.IGNORECASE)
-    clean_stem = re.sub(r"[^a-z0-9]", "", stem.lower())
-    if clean_stem:
-        return f"{bundle_param}.{clean_stem}"
-    return bundle_param
+    slug = cert.get("slug") or re.sub(r"[^a-z0-9]+", "", cert["id"].lower())
+    p12_rel = cert.get("p12", f"certs/{slug}/cert.p12")
+    mp_rel = cert.get("mobileprovision", f"certs/{slug}/cert.mobileprovision")
+    password = cert.get("password", "AppleP12.com")
+
+    p12_path = os.path.join(BASE_DIR, p12_rel)
+    mp_path = os.path.join(BASE_DIR, mp_rel)
+
+    if os.path.isfile(p12_path) and os.path.isfile(mp_path):
+        return p12_path, mp_path, password
+
+    dl_base = cfg["signtools_api"].get(
+        "certificate_download_endpoint",
+        "https://signtools.ipaomtk.com/server-certificate-download.php"
+    )
+    dl_url = f"{dl_base}?certificate={urllib.parse.quote(cert['id'], safe='')}"
+    print(f"[Locket ZSign] ⬇️ Đang tải chứng chỉ gốc {cert['id']}...")
+    req = urllib.request.Request(dl_url, headers=HEADERS)
+    data = urllib.request.urlopen(req, timeout=20).read()
+
+    cdir = os.path.dirname(p12_path)
+    os.makedirs(cdir, exist_ok=True)
+    with zipfile.ZipFile(io.BytesIO(data)) as z:
+        for name in z.namelist():
+            raw = z.read(name)
+            base = os.path.basename(name)
+            if not base:
+                continue
+            if base.endswith(".p12"):
+                with open(p12_path, "wb") as f:
+                    f.write(raw)
+            elif base.endswith(".mobileprovision"):
+                with open(mp_path, "wb") as f:
+                    f.write(raw)
+            elif base.endswith(".txt"):
+                txt = raw.decode("utf-8", errors="ignore")
+                for line in txt.splitlines():
+                    if "password" in line.lower() or "密码" in line:
+                        password = line.split("：")[-1].split(":")[-1].strip()
+
+    if not os.path.isfile(p12_path) or not os.path.isfile(mp_path):
+        raise RuntimeError(f"Không trích xuất được .p12/.mobileprovision cho {cert['id']}")
+
+    return p12_path, mp_path, password
 
 
-def patch_locket_ipa(
-    source_ipa_path: str,
-    output_ipa_path: str,
-    cfg: dict,
-    mode: str = "smart_widget",
-    cert_id: str = ""
-) -> dict:
+def prepare_clean_locket_gold_ipa(source_ipa_path: str, clean_ipa_path: str, cfg: dict) -> dict:
     """
-    Giải nén IPA Locket, xử lý PlugIns/*.appex theo chế độ (dual_clone / smart_widget / clean),
-    và đồng bộ toàn diện Info.plist + GoogleService-Info.plist cho cả App chính lẫn Widget Extension.
+    Làm sạch gói IPA Locket Gold trước khi đưa vào zsign:
+    - Xóa bỏ thư mục Payload/Locket.app/PlugIns/*.appex (chống xung đột App Group).
+    - Giữ nguyên 100% binary Locket, AutoRcSideload.dylib và blatantsPatch.dylib.
+    - Khóa cố định CFBundleIdentifier = com.locket.Locket trong Info.plist & GoogleService-Info.plist.
     """
-    spec = cfg["signing_spec"]
-    app_cfg = cfg["app"]
-
-    if mode == "dual_clone":
-        base_bundle_id = app_cfg.get("clone_bundle_id", "com.locket.Locket.gold")
-        display_name = app_cfg.get("clone_name", "Locket Gold")
-    else:
-        base_bundle_id = app_cfg.get("bundle_id", "com.locket.Locket")
-        display_name = app_cfg.get("name", "Locket Widget")
-
-    final_bundle_id = compute_signtools_final_bundle_id(base_bundle_id, output_ipa_path)
+    fixed_bundle_id = cfg["signing_spec"].get("fixed_bundle_id", "com.locket.Locket")
+    version_str = cfg["app"].get("version", "2.71.0")
 
     with tempfile.TemporaryDirectory() as tmpdir:
         with zipfile.ZipFile(source_ipa_path, "r") as zf:
@@ -91,160 +112,175 @@ def patch_locket_ipa(
         payload_dir = os.path.join(tmpdir, "Payload")
         app_dirs = [d for d in os.listdir(payload_dir) if d.endswith(".app")]
         if not app_dirs:
-            raise RuntimeError("Không tìm thấy thư mục .app trong Payload của Locket IPA")
+            raise RuntimeError("Không tìm thấy Payload/*.app trong IPA Locket")
 
         app_path = os.path.join(payload_dir, app_dirs[0])
+
+        # 1. Gỡ bỏ hoàn toàn PlugIns/*.appex
         plugins_dir = os.path.join(app_path, "PlugIns")
-
-        # 1. Xử lý thư mục PlugIns/*.appex theo từng chế độ
         if os.path.isdir(plugins_dir):
-            if mode in ("clean", "dual_clone"):
-                shutil.rmtree(plugins_dir)
-                print(f"[Locket Patcher] ({mode}) Đã gỡ bỏ PlugIns/*.appex để chống xung đột App Group & chạy song song mượt với bản App Store.")
-            elif mode == "smart_widget":
-                crash_exts = set(spec.get("strip_crash_extensions", [
-                    "LocketNotificationServiceExtension.appex",
-                    "LocketWidgetLocationExtension.appex"
-                ]))
-                for entry in os.listdir(plugins_dir):
-                    ext_path = os.path.join(plugins_dir, entry)
-                    if entry in crash_exts and os.path.isdir(ext_path):
-                        shutil.rmtree(ext_path)
-                        print(f"[Locket Patcher] Đã gỡ extension phụ gây xung đột ngầm: {entry}")
-                    elif entry.endswith(".appex") and os.path.isdir(ext_path):
-                        # Đồng bộ Info.plist và GoogleService-Info.plist bên trong từng Widget .appex giữ lại
-                        ext_info_path = os.path.join(ext_path, "Info.plist")
-                        if os.path.isfile(ext_info_path):
-                            with open(ext_info_path, "rb") as f:
-                                ext_info = plistlib.load(f)
-                            old_ext_bid = ext_info.get("CFBundleIdentifier", "")
-                            suffix = old_ext_bid.split(".")[-1] if "." in old_ext_bid else entry.replace(".appex", "")
-                            new_ext_bid = f"{final_bundle_id}.{suffix}"
-                            ext_info["CFBundleIdentifier"] = new_ext_bid
-                            with open(ext_info_path, "wb") as f:
-                                plistlib.dump(ext_info, f)
-                            print(f"[Locket Patcher] Đã đồng bộ Widget {entry} CFBundleIdentifier = {new_ext_bid}")
+            shutil.rmtree(plugins_dir)
+            print("[Locket Patcher] ✔ Đã xóa thư mục PlugIns/*.appex (tránh xung đột chứng chỉ Enterprise).")
 
-                        ext_gs_path = os.path.join(ext_path, "GoogleService-Info.plist")
-                        if os.path.isfile(ext_gs_path):
-                            with open(ext_gs_path, "rb") as f:
-                                ext_gs = plistlib.load(f)
-                            ext_gs["BUNDLE_ID"] = final_bundle_id
-                            with open(ext_gs_path, "wb") as f:
-                                plistlib.dump(ext_gs, f)
-                            print(f"[Locket Patcher] Đã đồng bộ {entry}/GoogleService-Info.plist BUNDLE_ID = {final_bundle_id}")
+        # 2. Nếu có IPAOMTK-real.dylib thì gỡ bỏ để tránh xung đột với AutoRcSideload.dylib & blatantsPatch.dylib
+        bad_dylib = os.path.join(app_path, "IPAOMTK-real.dylib")
+        if os.path.isfile(bad_dylib):
+            os.remove(bad_dylib)
+            print("[Locket Patcher] ✔ Đã loại bỏ IPAOMTK-real.dylib thừa.")
 
-        # 2. Đồng bộ Bundle ID & Tên hiển thị trong Payload/Locket.app/Info.plist
+        # 3. Kiểm tra sự hiện diện của bộ đôi tweak Locket Gold + Sideload Fix
+        fw_dir = os.path.join(app_path, "Frameworks")
+        found_tweaks = []
+        for tw in ("AutoRcSideload.dylib", "blatantsPatch.dylib"):
+            if os.path.isfile(os.path.join(fw_dir, tw)):
+                found_tweaks.append(tw)
+        print(f"[Locket Patcher] ✔ Tweak tích hợp sẵn trong Frameworks: {', '.join(found_tweaks)}")
+
+        # 4. Đảm bảo Info.plist và GoogleService-Info.plist giữ nguyên com.locket.Locket
         info_plist_path = os.path.join(app_path, "Info.plist")
         if os.path.isfile(info_plist_path):
             with open(info_plist_path, "rb") as f:
                 info_data = plistlib.load(f)
-            info_data["CFBundleIdentifier"] = final_bundle_id
-            if mode == "dual_clone":
-                info_data["CFBundleDisplayName"] = display_name
-                info_data["CFBundleName"] = display_name
+            info_data["CFBundleIdentifier"] = fixed_bundle_id
+            version_str = info_data.get("CFBundleShortVersionString", version_str)
             with open(info_plist_path, "wb") as f:
                 plistlib.dump(info_data, f)
-            print(f"[Locket Patcher] Đã cập nhật Info.plist: CFBundleIdentifier = {final_bundle_id} ({display_name})")
 
-        # 3. Đồng bộ BUNDLE_ID trong Payload/Locket.app/GoogleService-Info.plist
-        if spec.get("sync_google_service_plist", True):
-            gs_plist_path = os.path.join(app_path, "GoogleService-Info.plist")
-            if os.path.isfile(gs_plist_path):
-                with open(gs_plist_path, "rb") as f:
-                    gs_data = plistlib.load(f)
-                gs_data["BUNDLE_ID"] = final_bundle_id
-                with open(gs_plist_path, "wb") as f:
-                    plistlib.dump(gs_data, f)
-                print(f"[Locket Patcher] Đã đồng bộ GoogleService-Info.plist: BUNDLE_ID = {final_bundle_id}")
+        gs_plist_path = os.path.join(app_path, "GoogleService-Info.plist")
+        if os.path.isfile(gs_plist_path):
+            with open(gs_plist_path, "rb") as f:
+                gs_data = plistlib.load(f)
+            gs_data["BUNDLE_ID"] = fixed_bundle_id
+            with open(gs_plist_path, "wb") as f:
+                plistlib.dump(gs_data, f)
 
-        # 4. Chuyển hướng selector vùng nhớ App Group sang thư mục Sandbox nội bộ & đồng bộ Team ID Keychain
-        exec_path = os.path.join(app_path, "Locket")
-        if os.path.isfile(exec_path):
-            with open(exec_path, "rb") as f:
-                bin_data = f.read()
+        print(f"[Locket Patcher] ✔ Đã cố định Bundle ID gốc: {fixed_bundle_id} (v{version_str})")
 
-            old_sel = b"containerURLForSecurityApplicationGroupIdentifier:\x00"
-            new_sel = b"temporaryDirectory\x00".ljust(len(old_sel), b"\x00")
-            if old_sel in bin_data:
-                bin_data = bin_data.replace(old_sel, new_sel)
-                print("[Locket Patcher] Đã chuyển hướng App Group Container sang Sandbox nội bộ (chống văng nil containerURL).")
-
-            team_id = spec.get("certificate_team_ids", {}).get(cert_id, "")
-            if team_id and len(team_id) == 10:
-                old_team = b"SWD4AZY4KG."
-                new_team = f"{team_id}.".encode("ascii")
-                if old_team in bin_data:
-                    bin_data = bin_data.replace(old_team, new_team)
-                    print(f"[Locket Patcher] Đã đồng bộ Keychain Access Group Team ID = {team_id}")
-
-            with open(exec_path, "wb") as f:
-                f.write(bin_data)
-
-        # 5. Đóng gói lại thành file IPA sạch
-        with zipfile.ZipFile(output_ipa_path, "w", zipfile.ZIP_DEFLATED) as zout:
+        # 5. Đóng gói lại thành file IPA sạch để đưa vào zsign
+        with zipfile.ZipFile(clean_ipa_path, "w", zipfile.ZIP_DEFLATED) as zout:
             for root, _, files in os.walk(tmpdir):
                 for file in files:
                     full_path = os.path.join(root, file)
                     rel_path = os.path.relpath(full_path, tmpdir)
                     zout.write(full_path, rel_path)
 
-    print(f"[Locket Patcher] ✅ Đã đóng gói IPA hoàn chỉnh tại: {output_ipa_path}")
     return {
-        "ipa_path": output_ipa_path,
-        "base_bundle_id": base_bundle_id,
-        "final_bundle_id": final_bundle_id,
-        "display_name": display_name,
-        "mode": mode
+        "clean_ipa_path": clean_ipa_path,
+        "bundle_id": fixed_bundle_id,
+        "version": version_str
     }
 
 
-def upload_and_sign_patched_ipa(cfg: dict, patched_info: dict, cert_id: str) -> dict:
+def generate_ota_manifest(
+    manifest_path: str,
+    ipa_download_url: str,
+    bundle_id: str,
+    version: str,
+    title: str,
+    icon_url: str
+) -> None:
+    os.makedirs(os.path.dirname(manifest_path), exist_ok=True)
+    plist_content = {
+        "items": [
+            {
+                "assets": [
+                    {
+                        "kind": "software-package",
+                        "url": ipa_download_url
+                    },
+                    {
+                        "kind": "display-image",
+                        "url": icon_url
+                    },
+                    {
+                        "kind": "full-size-image",
+                        "url": icon_url
+                    }
+                ],
+                "metadata": {
+                    "bundle-identifier": bundle_id,
+                    "bundle-version": version,
+                    "kind": "software",
+                    "title": title
+                }
+            }
+        ]
+    }
+    with open(manifest_path, "wb") as f:
+        plistlib.dump(plist_content, f)
+
+
+def upload_to_github_release(signed_ipa_path: str, release_tag: str, repo: str) -> str:
     """
-    Upload bản IPA Locket đã patch lên endpoint sign-merge.php để ký bằng chứng chỉ doanh nghiệp.
+    Đẩy file IPA đã ký bằng zsign lên GitHub Releases để làm CDN tải trực tiếp tốc độ cao.
     """
-    merge_url = cfg["signtools_api"]["local_sign_merge"]
-    local_ipa = patched_info["ipa_path"]
-    boundary = f"----WebKitFormBoundary{int(time.time() * 1000)}"
+    asset_name = os.path.basename(signed_ipa_path)
+    gh_bin = shutil.which("gh")
+    if gh_bin:
+        subprocess.run(
+            [gh_bin, "release", "create", release_tag, "--repo", repo, "--title", f"Signed IPA Builds ({release_tag})", "--notes", "Auto-signed Locket Gold IPA builds via zsign"],
+            capture_output=True,
+            text=True
+        )
+        subprocess.run(
+            [gh_bin, "release", "upload", release_tag, signed_ipa_path, "--repo", repo, "--clobber"],
+            check=True
+        )
+    return f"https://github.com/{repo}/releases/download/{release_tag}/{asset_name}"
 
-    fields = {
-        "certificate_mode": "server",
-        "server_certificate": cert_id,
-        "bundle": patched_info["base_bundle_id"],
-        "custom_name": patched_info["display_name"],
-        "mode": "custom_ipa"
-    }
 
-    body = io.BytesIO()
-    for k, v in fields.items():
-        body.write(f"--{boundary}\r\n".encode("utf-8"))
-        body.write(f'Content-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode("utf-8"))
+def sign_with_zsign(
+    clean_info: dict,
+    cert: dict,
+    cfg: dict,
+    out_dir: str
+) -> dict:
+    zsign_bin = shutil.which("zsign")
+    if not zsign_bin:
+        raise RuntimeError("Chưa cài đặt công cụ `zsign` trên môi trường hiện tại.")
 
-    filename = os.path.basename(local_ipa)
-    body.write(f"--{boundary}\r\n".encode("utf-8"))
-    body.write(f'Content-Disposition: form-data; name="custom_ipa"; filename="{filename}"\r\n'.encode("utf-8"))
-    body.write(b"Content-Type: application/octet-stream\r\n\r\n")
-    with open(local_ipa, "rb") as f:
-        body.write(f.read())
-    body.write(f"\r\n--{boundary}--\r\n".encode("utf-8"))
+    slug = cert.get("slug") or re.sub(r"[^a-z0-9]+", "", cert["id"].lower())
+    p12_path, mp_path, password = ensure_certificate_files(cfg, cert)
+    fixed_bundle_id = clean_info["bundle_id"]
+    version = clean_info["version"]
 
-    req_headers = {
-        **HEADERS,
-        "Content-Type": f"multipart/form-data; boundary={boundary}"
-    }
-    req = urllib.request.Request(merge_url, data=body.getvalue(), headers=req_headers, method="POST")
-    with urllib.request.urlopen(req, timeout=240) as resp:
-        payload = json.loads(resp.read().decode("utf-8"))
+    signed_ipa_name = f"LocketGold-{slug}.ipa"
+    signed_ipa_path = os.path.join(out_dir, signed_ipa_name)
 
-    if not payload.get("ok"):
-        raise RuntimeError(payload.get("error") or payload.get("message") or "Lỗi khi ký qua sign-merge.php")
+    cmd = [
+        zsign_bin,
+        "-k", p12_path,
+        "-p", password,
+        "-m", mp_path,
+        "-b", fixed_bundle_id,
+        "-z", "6",
+        "-o", signed_ipa_path,
+        clean_info["clean_ipa_path"]
+    ]
+    print(f"[Locket ZSign] 🔐 Đang chạy zsign cho {cert['label']} (Bundle ID: {fixed_bundle_id})...")
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    if res.returncode != 0 or not os.path.isfile(signed_ipa_path):
+        raise RuntimeError(f"zsign thất bại ({res.returncode}): {res.stderr or res.stdout}")
 
-    app_out = payload.get("app") or payload.get("customApp") or (payload.get("apps")[0] if payload.get("apps") else {})
-    manifest_url = app_out.get("manifestUrl") or ""
-    install_url = app_out.get("installUrl") or ""
-    ipa_url = app_out.get("ipaUrl") or ""
-    if not manifest_url or not install_url:
-        raise RuntimeError(f"sign-merge.php không trả về manifestUrl/installUrl: {payload}")
+    repo = cfg["app"].get("github_repo", "manhcuong2112003/vmctrick")
+    release_tag = cfg["app"].get("release_tag", "v1.0-signed")
+    pages_base = cfg["app"].get("github_pages_base", f"https://manhcuong2112003.github.io/vmctrick").rstrip("/")
+
+    ipa_url = upload_to_github_release(signed_ipa_path, release_tag, repo)
+
+    manifest_filename = f"locket-{slug}.plist"
+    manifest_local_path = os.path.join(MANIFESTS_DIR, manifest_filename)
+    generate_ota_manifest(
+        manifest_path=manifest_local_path,
+        ipa_download_url=ipa_url,
+        bundle_id=fixed_bundle_id,
+        version=version,
+        title=cfg["app"].get("name", "Locket Gold"),
+        icon_url=cfg["app"].get("icon", "")
+    )
+
+    manifest_url = f"{pages_base}/manifests/{manifest_filename}"
+    install_url = f"itms-services://?action=download-manifest&url={urllib.parse.quote(manifest_url, safe='')}"
 
     return {
         "manifest_url": manifest_url,
@@ -255,95 +291,11 @@ def upload_and_sign_patched_ipa(cfg: dict, patched_info: dict, cert_id: str) -> 
     }
 
 
-def remote_sign_locket(cfg: dict, cert_id: str, bundle_override: str = "") -> dict:
-    """
-    Ký Locket trực tiếp qua Remote Sign API (tạo bản cài đặt song song cùng bản App Store).
-    Vì signtools tự động đổi Bundle ID sang com.locket.Locket.locketwidgetipaomtkcom (khác với
-    com.locket.Locket của App Store), người dùng có thể cài CẢ 2 BẢN trên cùng 1 iPhone:
-    - Bản App Store: giữ Widget ngoài màn hình chính & màn hình khóa 100% chính chủ Apple.
-    - Bản IPA đã ký: mở khóa tính năng mở rộng (IPAOMTK-real.dylib).
-    """
-    api = cfg["signtools_api"]
-    app = cfg["app"]
-    spec = cfg["signing_spec"]
-
-    payload = urllib.parse.urlencode({
-        "certificate_mode": "server",
-        "server_certificate": cert_id,
-        "bundle": bundle_override or app.get("bundle_id", "com.locket.Locket"),
-        "ipa_url": app["remote_ipa_url"],
-        "app_name": app["name"]
-    }).encode("utf-8")
-
-    req = urllib.request.Request(
-        api["remote_sign_start"],
-        data=payload,
-        headers={**HEADERS, "Content-Type": "application/x-www-form-urlencoded"},
-        method="POST"
-    )
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        start_data = json.loads(resp.read().decode("utf-8"))
-
-    job_id = start_data.get("jobId") or start_data.get("id")
-    if not start_data.get("ok", True) or not job_id:
-        raise RuntimeError(f"Không tạo được job ký Locket: {start_data}")
-
-    deadline = time.time() + spec.get("timeout_seconds", 240)
-    while time.time() < deadline:
-        time.sleep(3)
-        status_url = f"{api['remote_sign_status']}?job={urllib.parse.quote(str(job_id))}&t={int(time.time() * 1000)}"
-        try:
-            req_st = urllib.request.Request(status_url, headers=HEADERS)
-            with urllib.request.urlopen(req_st, timeout=20) as resp_st:
-                st = json.loads(resp_st.read().decode("utf-8"))
-        except Exception:
-            continue
-
-        if st.get("status") == "done":
-            app_out = st.get("app") or {}
-            manifest_url = app_out.get("manifestUrl") or ""
-            install_url = app_out.get("installUrl") or st.get("link") or ""
-            ipa_url = app_out.get("ipaUrl") or ""
-            if not manifest_url or not install_url:
-                raise RuntimeError("Server ký xong nhưng thiếu manifestUrl/installUrl.")
-            return {
-                "manifest_url": manifest_url,
-                "install_url": install_url,
-                "ipa_url": ipa_url,
-                "signed_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "status": "active"
-            }
-
-        if st.get("status") == "error" or st.get("ok") is False:
-            raise RuntimeError(f"Lỗi từ máy chủ ký Locket: {st.get('error') or st}")
-
-    raise TimeoutError("Quá thời gian chờ ký Locket Widget")
-
-
-def sync_to_shared_portal(cfg: dict, servers: list) -> None:
-    shared_name = cfg["app"].get("shared_cache_file", "links_cache.json")
-    shared_path = os.path.join(BASE_DIR, shared_name)
-    if not os.path.exists(shared_path):
-        return
-    try:
-        with open(shared_path, "r", encoding="utf-8") as f:
-            shared = json.load(f)
-        app_id = cfg["app"]["id"]
-        if "apps" in shared and app_id in shared["apps"]:
-            shared["apps"][app_id]["servers"] = servers
-            shared["apps"][app_id]["appstore_url"] = cfg["app"].get("appstore_url", "https://apps.apple.com/app/locket-widget/id1600525061")
-            shared["apps"][app_id]["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
-            shared["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
-            with open(shared_path, "w", encoding="utf-8") as f:
-                json.dump(shared, f, ensure_ascii=False, indent=2)
-            import auto_sign_manager
-            auto_sign_manager.update_html_file(auto_sign_manager.load_config(), shared)
-    except Exception as e:
-        print(f"[Locket Signer] Lưu ý khi đồng bộ sang {shared_name}: {e}")
-
-
 def check_manifest_alive(manifest_url: str) -> bool:
-    if not manifest_url or "Locket-signed-" not in manifest_url:
+    if not manifest_url:
+        return False
+    # Chỉ chấp nhận manifest tự ký bằng zsign (nằm trong /manifests/locket-*.plist)
+    if "/manifests/locket-" not in manifest_url:
         return False
     try:
         req = urllib.request.Request(
@@ -369,7 +321,7 @@ def check_manifest_alive(manifest_url: str) -> bool:
         return False
 
 
-def load_existing_patched_servers(cfg: dict) -> dict:
+def load_existing_zsign_servers(cfg: dict) -> dict:
     by_cert = {}
     for fname in (cfg["app"].get("cache_file", "links_cache_locket.json"), cfg["app"].get("shared_cache_file", "links_cache.json")):
         fpath = os.path.join(BASE_DIR, fname)
@@ -383,16 +335,40 @@ def load_existing_patched_servers(cfg: dict) -> dict:
                 for s in srvs:
                     cid = s.get("cert_id")
                     murl = s.get("manifest_url", "")
-                    if cid and "Locket-signed-" in murl and cid not in by_cert:
+                    if cid and "/manifests/locket-" in murl and cid not in by_cert:
                         by_cert[cid] = s
             except Exception:
                 pass
     return by_cert
 
 
-def run_once(local_patch: bool = True, patch_mode: str = "clean", force: bool = False) -> list:
+def sync_to_shared_portal(cfg: dict, servers: list) -> None:
+    shared_name = cfg["app"].get("shared_cache_file", "links_cache.json")
+    shared_path = os.path.join(BASE_DIR, shared_name)
+    if not os.path.exists(shared_path):
+        return
+    try:
+        with open(shared_path, "r", encoding="utf-8") as f:
+            shared = json.load(f)
+        app_id = cfg["app"]["id"]
+        if "apps" in shared and app_id in shared["apps"]:
+            shared["apps"][app_id]["name"] = cfg["app"].get("name", "Locket Gold")
+            shared["apps"][app_id]["version"] = cfg["app"].get("version", "2.71.0")
+            shared["apps"][app_id]["servers"] = servers
+            shared["apps"][app_id]["appstore_url"] = cfg["app"].get("appstore_url", "https://apps.apple.com/app/locket-widget/id1600525061")
+            shared["apps"][app_id]["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            shared["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            with open(shared_path, "w", encoding="utf-8") as f:
+                json.dump(shared, f, ensure_ascii=False, indent=2)
+            import auto_sign_manager
+            auto_sign_manager.update_html_file(auto_sign_manager.load_config(), shared)
+    except Exception as e:
+        print(f"[Locket ZSign] Lưu ý khi đồng bộ sang {shared_name}: {e}")
+
+
+def run_once(force: bool = False) -> list:
     cfg = load_config()
-    existing_by_cert = load_existing_patched_servers(cfg)
+    existing_by_cert = load_existing_zsign_servers(cfg)
     servers = []
     missing_certs = []
 
@@ -400,7 +376,7 @@ def run_once(local_patch: bool = True, patch_mode: str = "clean", force: bool = 
         cid = cert["id"]
         existing = existing_by_cert.get(cid)
         if not force and existing and check_manifest_alive(existing.get("manifest_url", "")):
-            print(f"[Locket Signer] ✔ Link đã patch của {cert['label']} đang hoạt động tốt: {existing['manifest_url']}")
+            print(f"[Locket ZSign] ✔ Link ZSign của {cert['label']} đang hoạt động tốt: {existing['manifest_url']}")
             servers.append({
                 **existing,
                 "cert_id": cid,
@@ -410,57 +386,68 @@ def run_once(local_patch: bool = True, patch_mode: str = "clean", force: bool = 
         else:
             missing_certs.append(cert)
 
-    raw_ipa = None
-    tmp_dir = None
-    if local_patch and missing_certs:
-        tmp_dir = tempfile.mkdtemp(prefix="locket_patch_")
-        raw_ipa = os.path.join(tmp_dir, "Locket-Original.ipa")
-        print(f"[Locket Signer] ⬇️ Đang tải IPA gốc từ {cfg['app']['remote_ipa_url']}...")
-        req = urllib.request.Request(cfg["app"]["remote_ipa_url"], headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=180) as resp, open(raw_ipa, "wb") as out_f:
-            shutil.copyfileobj(resp, out_f)
+    if missing_certs:
+        zsign_bin = shutil.which("zsign")
+        if not zsign_bin:
+            print("[Locket ZSign] ℹ️ Máy hiện tại chưa có binary `zsign`. Sẽ tạo sẵn manifest.plist và thực thi ký tự động trên GitHub Actions Runner.")
+            repo = cfg["app"].get("github_repo", "manhcuong2112003/vmctrick")
+            release_tag = cfg["app"].get("release_tag", "v1.0-signed")
+            pages_base = cfg["app"].get("github_pages_base", "https://manhcuong2112003.github.io/vmctrick").rstrip("/")
+            fixed_bundle_id = cfg["signing_spec"].get("fixed_bundle_id", "com.locket.Locket")
+            version = cfg["app"].get("version", "2.71.0")
 
-    try:
-        for cert in missing_certs:
-            try:
-                print(f"[Locket Signer] ⏳ Đang ký {cfg['app']['name']} với {cert['label']}...")
-                if raw_ipa and os.path.isfile(raw_ipa):
-                    try:
-                        out_ipa = os.path.join(tmp_dir, "Locket.ipa")
-                        patched_info = patch_locket_ipa(raw_ipa, out_ipa, cfg, mode=patch_mode, cert_id=cert["id"])
-                        res = upload_and_sign_patched_ipa(cfg, patched_info, cert["id"])
-                    except Exception as up_err:
-                        print(f"[Locket Signer] ⚠️ Upload IPA patch thất bại ({up_err}), chuyển sang Remote Sign...")
-                        res = remote_sign_locket(cfg, cert["id"])
-                else:
-                    res = remote_sign_locket(cfg, cert["id"])
-
+            for cert in missing_certs:
+                ensure_certificate_files(cfg, cert)
+                slug = cert.get("slug") or re.sub(r"[^a-z0-9]+", "", cert["id"].lower())
+                ipa_url = f"https://github.com/{repo}/releases/download/{release_tag}/LocketGold-{slug}.ipa"
+                manifest_filename = f"locket-{slug}.plist"
+                manifest_local_path = os.path.join(MANIFESTS_DIR, manifest_filename)
+                generate_ota_manifest(
+                    manifest_path=manifest_local_path,
+                    ipa_download_url=ipa_url,
+                    bundle_id=fixed_bundle_id,
+                    version=version,
+                    title=cfg["app"].get("name", "Locket Gold"),
+                    icon_url=cfg["app"].get("icon", "")
+                )
+                manifest_url = f"{pages_base}/manifests/{manifest_filename}"
+                install_url = f"itms-services://?action=download-manifest&url={urllib.parse.quote(manifest_url, safe='')}"
                 servers.append({
                     "cert_id": cert["id"],
                     "label": cert["label"],
                     "badge": cert["badge"],
-                    **res
+                    "manifest_url": manifest_url,
+                    "install_url": install_url,
+                    "ipa_url": ipa_url,
+                    "signed_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "status": "active"
                 })
-                print(f"[Locket Signer] ✅ Thành công: {res['manifest_url']}")
-            except Exception as e:
-                print(f"[Locket Signer] ❌ Thất bại ({cert['label']}): {e}")
-    finally:
-        if tmp_dir and os.path.isdir(tmp_dir):
-            shutil.rmtree(tmp_dir, ignore_errors=True)
+        else:
+            tmp_dir = tempfile.mkdtemp(prefix="locket_zsign_")
+            try:
+                raw_ipa = os.path.join(tmp_dir, "Locket-Original.ipa")
+                clean_ipa = os.path.join(tmp_dir, "Locket-Clean.ipa")
+                print(f"[Locket ZSign] ⬇️ Đang tải IPA Locket Gold gốc từ {cfg['app']['remote_ipa_url']}...")
+                req = urllib.request.Request(cfg["app"]["remote_ipa_url"], headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req, timeout=180) as resp, open(raw_ipa, "wb") as out_f:
+                    shutil.copyfileobj(resp, out_f)
 
-    # Thêm tùy chọn cài song song Bản App Store Chính Chủ ở cuối danh sách để giữ Widget 100%
-    appstore_url = cfg["app"].get("appstore_url", "https://apps.apple.com/app/locket-widget/id1600525061")
-    servers.append({
-        "cert_id": "apple_appstore_official",
-        "label": f"Server {len(servers) + 1} — Bản Gốc App Store (Giữ Widget 100%)",
-        "badge": "Chính chủ Apple • Hiện Widget Màn hình khóa",
-        "manifest_url": appstore_url,
-        "install_url": appstore_url,
-        "ipa_url": cfg["app"]["remote_ipa_url"],
-        "signed_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "ocsp_status": "APPLE_OFFICIAL",
-        "status": "active"
-    })
+                clean_info = prepare_clean_locket_gold_ipa(raw_ipa, clean_ipa, cfg)
+
+                for cert in missing_certs:
+                    try:
+                        res = sign_with_zsign(clean_info, cert, cfg, tmp_dir)
+                        servers.append({
+                            "cert_id": cert["id"],
+                            "label": cert["label"],
+                            "badge": cert["badge"],
+                            **res
+                        })
+                        print(f"[Locket ZSign] ✅ Đã ký ZSign & phát hành thành công: {res['manifest_url']}")
+                    except Exception as e:
+                        print(f"[Locket ZSign] ❌ Lỗi khi ký với {cert['label']}: {e}")
+            finally:
+                shutil.rmtree(tmp_dir, ignore_errors=True)
 
     cache_path = os.path.join(BASE_DIR, cfg["app"]["cache_file"])
     with open(cache_path, "w", encoding="utf-8") as f:
@@ -476,22 +463,11 @@ def run_once(local_patch: bool = True, patch_mode: str = "clean", force: bool = 
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Trình xử lý & ký chuyên biệt cho Locket Widget")
-    parser.add_argument(
-        "--local-patch",
-        action="store_true",
-        help="Tải IPA về máy, giải nén xử lý PlugIns/*.appex + đồng bộ GoogleService-Info.plist rồi upload ký"
-    )
-    parser.add_argument(
-        "--mode",
-        choices=["dual_clone", "smart_widget", "clean"],
-        default="clean",
-        help="Chế độ xử lý IPA: dual_clone (chạy song song App Store để giữ Widget 100%%), smart_widget (giữ LocketWidgetExtension.appex), clean (gỡ toàn bộ .appex)"
-    )
+    parser = argparse.ArgumentParser(description="Trình ký tự chủ ZSign cho Locket Gold")
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Bắt buộc đóng gói và ký mới lại toàn bộ các Server"
+        help="Bắt buộc đóng gói và ký mới lại toàn bộ các Server bằng zsign"
     )
     args = parser.parse_args()
-    run_once(local_patch=True, patch_mode=args.mode, force=args.force)
+    run_once(force=args.force)

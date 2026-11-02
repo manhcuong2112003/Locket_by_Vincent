@@ -1,0 +1,20 @@
+{
+  "beihang": {
+    "id": "main/Beihang University.zip",
+    "p12": "certs/beihang/cert.p12",
+    "mobileprovision": "certs/beihang/cert.mobileprovision",
+    "password": "AppleP12.com"
+  },
+  "rakuten": {
+    "id": "main/RAKUTEN SECURITIES,INC.zip",
+    "p12": "certs/rakuten/cert.p12",
+    "mobileprovision": "certs/rakuten/cert.mobileprovision",
+    "password": "AppleP12.com"
+  },
+  "chinatelecom": {
+    "id": "main/China Telecom Corporation Limited.zip",
+    "p12": "certs/chinatelecom/cert.p12",
+    "mobileprovision": "certs/chinatelecom/cert.mobileprovision",
+    "password": "AppleP12.com"
+  }
+}

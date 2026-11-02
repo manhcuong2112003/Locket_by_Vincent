@@ -1,9 +1,9 @@
-name: Auto-Sign & Health Check iOS Portal (Game & Locket)
+name: Auto-Sign & Health Check iOS Portal (Game & Locket Gold ZSign)
 
 on:
   schedule:
-    # Tự động chạy mỗi 20 phút trên máy chủ GitHub (24/7 kể cả khi tắt PC)
-    - cron: '*/20 * * * *'
+    # Tự động chạy mỗi 30 phút trên máy chủ GitHub (24/7 kể cả khi tắt PC)
+    - cron: '*/30 * * * *'
   workflow_dispatch: # Cho phép bấm chạy thủ công ngay trên tab Actions
 
 permissions:
@@ -27,27 +27,54 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Cache and Install zsign
+        id: cache-zsign
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/zsign
+          key: zsign-ubuntu-${{ runner.os }}-v1
+
+      - name: Build zsign if not cached
+        if: steps.cache-zsign.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev zlib1g-dev libminizip-dev git cmake pkg-config
+          git clone --depth 1 https://github.com/zhlynn/zsign.git /tmp/zsign
+          cd /tmp/zsign
+          if [ -f CMakeLists.txt ]; then
+            mkdir -p build && cd build
+            cmake ..
+            make -j$(nproc)
+            sudo cp zsign /usr/local/bin/zsign
+          else
+            g++ *.cpp common/*.cpp -lcrypto -I/usr/include -O3 -o zsign
+            sudo cp zsign /usr/local/bin/zsign
+          fi
+          sudo chmod +x /usr/local/bin/zsign
+          zsign --version || true
+
       - name: Pull latest changes before signing
         run: |
           git pull --rebase origin main || true
 
-      - name: Run Dedicated Locket Signer & Game Signer + Portal Sync
+      - name: Run Self-Hosted ZSign Locket Gold & Game Signer
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
         run: |
-          python3 auto_sign_manager.py
           python3 sign_locket.py
           python3 sign_game.py
+          python3 auto_sign_manager.py
 
-      - name: Commit and Push updated cache & HTML
+      - name: Commit and Push updated manifests, cache & HTML
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A links_cache*.json index.html config*.json
+          git add -A manifests/ certs/ links_cache*.json index.html config*.json
           if ! git diff --cached --quiet; then
-            git commit -m "chore(auto-sign): update signed manifest links & status [skip ci]"
+            git commit -m "chore(zsign): update Locket Gold ZSign manifests & portal links [skip ci]"
             git pull --rebase -X theirs origin main || true
             git push origin HEAD:main
           else

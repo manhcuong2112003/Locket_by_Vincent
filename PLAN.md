@@ -97,3 +97,4 @@ flowchart TD
 ### Bước 4: Triển khai Cổng Web độc lập
 - Tạo repository riêng trên GitHub (ví dụ: `Vincent-Game-Locket`).
 - Triển khai hosting riêng qua GitHub Pages hoặc Cloudflare Pages tách biệt hoàn toàn với `vincenttrick.pages.dev` của Shadowrocket.
+

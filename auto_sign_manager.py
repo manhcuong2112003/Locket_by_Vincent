@@ -552,6 +552,28 @@ def run_sync(force_resign: bool = False) -> bool:
             existing_servers = cache.get("servers", [])
         existing_by_id = {s["cert_id"]: s for s in existing_servers}
 
+        if app_id == "locket-widget":
+            log("ℹ️ [Locket Gold] Chuyển quyền xử lý ký tự chủ bằng ZSign cho sign_locket.py (không qua signtools).")
+            ordered_apps[app_id] = {
+                **app_cache,
+                "id": app_id,
+                "name": item["name"],
+                "category": item.get("category", "app"),
+                "tag_vi": item.get("tag_vi", "Ứng dụng"),
+                "tag_en": item.get("tag_en", "App"),
+                "version": item.get("version", "2.71.0"),
+                "size": item.get("size", "86.8 MB"),
+                "subtitle_vi": item.get("subtitle_vi", ""),
+                "subtitle_en": item.get("subtitle_en", ""),
+                "features_vi": item.get("features_vi", []),
+                "features_en": item.get("features_en", []),
+                "icon": item.get("icon", ""),
+                "remote_ipa_url": item.get("remote_ipa_url", ""),
+                "source_page_url": item.get("source_page_url", ""),
+                "servers": existing_servers
+            }
+            continue
+
         item_force = force_resign
         if check_item_upstream_update(item, app_cache, cfg):
             log(f"🔄 [{item['name']}] Có bản cập nhật IPA mới -> Tự động ký lại toàn bộ Server!")
