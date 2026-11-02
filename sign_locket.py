@@ -210,13 +210,42 @@ def generate_ota_manifest(
         plistlib.dump(plist_content, f)
 
 
+def get_github_token() -> str:
+    tok = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN") or ""
+    if tok:
+        return tok
+    try:
+        creds = subprocess.check_output(
+            ["git", "credential", "fill"],
+            input=b"protocol=https\nhost=github.com\nusername=manhcuong2112003\n\n"
+        ).decode("utf-8", errors="ignore")
+        for line in creds.splitlines():
+            if line.startswith("password="):
+                return line.split("=", 1)[1].strip()
+    except Exception:
+        pass
+    return ""
+
+
+def find_zsign_binary() -> str | None:
+    for candidate in (
+        shutil.which("zsign"),
+        os.path.join(BASE_DIR, "zsign.exe"),
+        os.path.join(BASE_DIR, "zsign")
+    ):
+        if candidate and os.path.isfile(candidate):
+            return candidate
+    return None
+
+
 def upload_to_github_release(signed_ipa_path: str, release_tag: str, repo: str) -> str:
     """
     Đẩy file IPA đã ký bằng zsign lên GitHub Releases để làm CDN tải trực tiếp tốc độ cao.
+    Hỗ trợ cả `gh` CLI lẫn GitHub REST API trực tiếp.
     """
     asset_name = os.path.basename(signed_ipa_path)
     gh_bin = shutil.which("gh")
-    if gh_bin:
+    if gh_bin and (os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")):
         subprocess.run(
             [gh_bin, "release", "create", release_tag, "--repo", repo, "--title", f"Signed IPA Builds ({release_tag})", "--notes", "Auto-signed Locket Gold IPA builds via zsign"],
             capture_output=True,
@@ -226,6 +255,66 @@ def upload_to_github_release(signed_ipa_path: str, release_tag: str, repo: str) 
             [gh_bin, "release", "upload", release_tag, signed_ipa_path, "--repo", repo, "--clobber"],
             check=True
         )
+        return f"https://github.com/{repo}/releases/download/{release_tag}/{asset_name}"
+
+    token = get_github_token()
+    if not token:
+        raise RuntimeError("Không tìm thấy GitHub Token để upload IPA lên GitHub Releases.")
+
+    api_headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "Locket-ZSign-Uploader"
+    }
+
+    # 1. Lấy hoặc tạo Release theo tag
+    rel_data = None
+    try:
+        req = urllib.request.Request(f"https://api.github.com/repos/{repo}/releases/tags/{release_tag}", headers=api_headers)
+        rel_data = json.loads(urllib.request.urlopen(req, timeout=20).read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            create_req = urllib.request.Request(
+                f"https://api.github.com/repos/{repo}/releases",
+                data=json.dumps({
+                    "tag_name": release_tag,
+                    "name": f"Signed IPA Builds ({release_tag})",
+                    "body": "Auto-signed Locket Gold IPA builds via zsign (Bundle ID: com.locket.Locket)"
+                }).encode("utf-8"),
+                headers={**api_headers, "Content-Type": "application/json"},
+                method="POST"
+            )
+            rel_data = json.loads(urllib.request.urlopen(create_req, timeout=20).read().decode("utf-8"))
+        else:
+            raise
+
+    # 2. Nếu asset cùng tên đã tồn tại thì xóa asset cũ để ghi đè (clobber)
+    for asset in rel_data.get("assets", []):
+        if asset.get("name") == asset_name:
+            del_req = urllib.request.Request(
+                f"https://api.github.com/repos/{repo}/releases/assets/{asset['id']}",
+                headers=api_headers,
+                method="DELETE"
+            )
+            urllib.request.urlopen(del_req, timeout=20).read()
+
+    # 3. Upload file nhị phân lên uploads.github.com
+    upload_url = f"https://uploads.github.com/repos/{repo}/releases/{rel_data['id']}/assets?name={urllib.parse.quote(asset_name)}"
+    with open(signed_ipa_path, "rb") as f:
+        ipa_bytes = f.read()
+
+    up_req = urllib.request.Request(
+        upload_url,
+        data=ipa_bytes,
+        headers={
+            **api_headers,
+            "Content-Type": "application/octet-stream",
+            "Content-Length": str(len(ipa_bytes))
+        },
+        method="POST"
+    )
+    print(f"[Locket ZSign] ☁️ Đang upload {asset_name} ({len(ipa_bytes) / 1048576:.1f} MB) lên GitHub Releases...")
+    urllib.request.urlopen(up_req, timeout=300).read()
     return f"https://github.com/{repo}/releases/download/{release_tag}/{asset_name}"
 
 
@@ -235,7 +324,7 @@ def sign_with_zsign(
     cfg: dict,
     out_dir: str
 ) -> dict:
-    zsign_bin = shutil.which("zsign")
+    zsign_bin = find_zsign_binary()
     if not zsign_bin:
         raise RuntimeError("Chưa cài đặt công cụ `zsign` trên môi trường hiện tại.")
 
@@ -387,15 +476,15 @@ def run_once(force: bool = False) -> list:
             missing_certs.append(cert)
 
     if missing_certs:
-        zsign_bin = shutil.which("zsign")
+        zsign_bin = find_zsign_binary()
+        repo = cfg["app"].get("github_repo", "manhcuong2112003/Locket_by_Vincent")
+        release_tag = cfg["app"].get("release_tag", "v1.0-signed")
+        pages_base = cfg["app"].get("github_pages_base", "https://manhcuong2112003.github.io/Locket_by_Vincent").rstrip("/")
+        fixed_bundle_id = cfg["signing_spec"].get("fixed_bundle_id", "com.locket.Locket")
+        version = cfg["app"].get("version", "2.71.0")
+
         if not zsign_bin:
             print("[Locket ZSign] ℹ️ Máy hiện tại chưa có binary `zsign`. Sẽ tạo sẵn manifest.plist và thực thi ký tự động trên GitHub Actions Runner.")
-            repo = cfg["app"].get("github_repo", "manhcuong2112003/Locket_by_Vincent")
-            release_tag = cfg["app"].get("release_tag", "v1.0-signed")
-            pages_base = cfg["app"].get("github_pages_base", "https://manhcuong2112003.github.io/Locket_by_Vincent").rstrip("/")
-            fixed_bundle_id = cfg["signing_spec"].get("fixed_bundle_id", "com.locket.Locket")
-            version = cfg["app"].get("version", "2.71.0")
-
             for cert in missing_certs:
                 ensure_certificate_files(cfg, cert)
                 slug = cert.get("slug") or re.sub(r"[^a-z0-9]+", "", cert["id"].lower())
@@ -426,13 +515,28 @@ def run_once(force: bool = False) -> list:
             tmp_dir = tempfile.mkdtemp(prefix="locket_zsign_")
             try:
                 raw_ipa = os.path.join(tmp_dir, "Locket-Original.ipa")
-                clean_ipa = os.path.join(tmp_dir, "Locket-Clean.ipa")
-                print(f"[Locket ZSign] ⬇️ Đang tải IPA Locket Gold gốc từ {cfg['app']['remote_ipa_url']}...")
-                req = urllib.request.Request(cfg["app"]["remote_ipa_url"], headers={"User-Agent": "Mozilla/5.0"})
-                with urllib.request.urlopen(req, timeout=180) as resp, open(raw_ipa, "wb") as out_f:
-                    shutil.copyfileobj(resp, out_f)
-
-                clean_info = prepare_clean_locket_gold_ipa(raw_ipa, clean_ipa, cfg)
+                clean_ipa = os.path.join(tmp_dir, "LocketGold-Clean-Base.ipa")
+                fallback_base_url = f"https://github.com/{repo}/releases/download/{release_tag}/LocketGold-Clean-Base.ipa"
+                try:
+                    print(f"[Locket ZSign] ⬇️ Đang tải IPA Locket Gold gốc từ {cfg['app']['remote_ipa_url']}...")
+                    req = urllib.request.Request(cfg["app"]["remote_ipa_url"], headers=HEADERS)
+                    with urllib.request.urlopen(req, timeout=180) as resp, open(raw_ipa, "wb") as out_f:
+                        shutil.copyfileobj(resp, out_f)
+                    clean_info = prepare_clean_locket_gold_ipa(raw_ipa, clean_ipa, cfg)
+                    try:
+                        upload_to_github_release(clean_ipa, release_tag, repo)
+                    except Exception as base_up_err:
+                        print(f"[Locket ZSign] Lưu ý khi lưu bản Base IPA lên Release: {base_up_err}")
+                except Exception as dl_err:
+                    print(f"[Locket ZSign] ⚠️ Nguồn chính chặn IP đám mây ({dl_err}), chuyển sang tải bản Base sạch từ GitHub Release: {fallback_base_url}")
+                    req_fb = urllib.request.Request(fallback_base_url, headers={"User-Agent": "Mozilla/5.0"})
+                    with urllib.request.urlopen(req_fb, timeout=180) as resp_fb, open(clean_ipa, "wb") as out_f:
+                        shutil.copyfileobj(resp_fb, out_f)
+                    clean_info = {
+                        "clean_ipa_path": clean_ipa,
+                        "bundle_id": fixed_bundle_id,
+                        "version": version
+                    }
 
                 for cert in missing_certs:
                     try:

@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-02 11:26:38",
+  "updated_at": "2026-11-02 11:35:09",
   "last_error": null,
   "last_alert_sent_at": 0,
   "in_error_state": false,
@@ -64,7 +64,7 @@
       "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
       "source_page_url": "https://ipaomtk.com/locket-widget/download/",
       "remote_ipa_signature": "\"6ae0e318-56cdc66\"|Tue, 27 Oct 2026 17:44:56 GMT|91020390",
-      "updated_at": "2026-11-02 11:26:38",
+      "updated_at": "2026-11-02 11:35:09",
       "servers": [
         {
           "cert_id": "main/Beihang University.zip",
@@ -73,7 +73,7 @@
           "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-beihang.plist",
           "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-beihang.plist",
           "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-beihang.ipa",
-          "signed_at": "2026-11-02 11:26:38",
+          "signed_at": "2026-11-02 11:34:34",
           "status": "active"
         },
         {
@@ -83,7 +83,7 @@
           "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-rakuten.plist",
           "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-rakuten.plist",
           "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-rakuten.ipa",
-          "signed_at": "2026-11-02 11:26:38",
+          "signed_at": "2026-11-02 11:34:53",
           "status": "active"
         },
         {
@@ -93,7 +93,7 @@
           "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-chinatelecom.plist",
           "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-chinatelecom.plist",
           "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-chinatelecom.ipa",
-          "signed_at": "2026-11-02 11:26:38",
+          "signed_at": "2026-11-02 11:35:09",
           "status": "active"
         }
       ],
