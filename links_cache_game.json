@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30 13:46:00",
+  "updated_at": "2026-11-02 07:05:52",
   "app": {
     "id": "asphalt-8",
     "name": "Asphalt 8 Airborne",
@@ -12,18 +12,5 @@
     "cache_file": "links_cache_game.json",
     "shared_cache_file": "links_cache.json"
   },
-  "servers": [
-    {
-      "cert_id": "main/China Telecom Corporation Limited.zip",
-      "label": "Server 1 — China Telecom (Full VPN)",
-      "badge": "Enterprise • Cần DNS",
-      "manifest_url": "https://signtools.ipaomtk.com/output/Asphalt-8-IPAOMTK.COM-signed-9a13ced8ecce09da862e.plist",
-      "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fsigntools.ipaomtk.com%2Foutput%2FAsphalt-8-IPAOMTK.COM-signed-9a13ced8ecce09da862e.plist",
-      "ipa_url": "https://signtools.ipaomtk.com/output/Asphalt-8-IPAOMTK.COM-signed-9a13ced8ecce09da862e.ipa",
-      "signed_at": "2026-10-29 21:06:28",
-      "ocsp_status": "REVOKED",
-      "status": "active"
-    }
-  ]
+  "servers": []
 }
-
