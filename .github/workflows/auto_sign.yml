@@ -27,31 +27,11 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Cache and Install zsign
-        id: cache-zsign
-        uses: actions/cache@v4
-        with:
-          path: /usr/local/bin/zsign
-          key: zsign-ubuntu-${{ runner.os }}-v1
-
-      - name: Build zsign if not cached
-        if: steps.cache-zsign.outputs.cache-hit != 'true'
+      - name: Install prebuilt zsign v1.1.3
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev zlib1g-dev libminizip-dev git cmake pkg-config
-          git clone --depth 1 https://github.com/zhlynn/zsign.git /tmp/zsign
-          cd /tmp/zsign
-          if [ -f CMakeLists.txt ]; then
-            mkdir -p build && cd build
-            cmake ..
-            make -j$(nproc)
-            sudo cp zsign /usr/local/bin/zsign
-          else
-            g++ *.cpp common/*.cpp -lcrypto -I/usr/include -O3 -o zsign
-            sudo cp zsign /usr/local/bin/zsign
-          fi
+          curl -sL https://github.com/zhlynn/zsign/releases/download/v1.1.3/zsign-linux-x86_64.tar.gz | sudo tar -xz -C /usr/local/bin
           sudo chmod +x /usr/local/bin/zsign
-          zsign --version || true
+          /usr/local/bin/zsign --version || true
 
       - name: Pull latest changes before signing
         run: |
