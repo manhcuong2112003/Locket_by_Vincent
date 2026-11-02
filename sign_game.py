@@ -102,7 +102,7 @@ def remote_sign_game(cfg: dict, cert_id: str) -> dict:
     if not start_data.get("ok", True) or not job_id:
         raise RuntimeError(f"Không lấy được jobId khi ký Game: {start_data}")
 
-    deadline = time.time() + spec.get("timeout_seconds", 360)
+    deadline = time.time() + min(int(spec.get("timeout_seconds", 90)), 90)
     while time.time() < deadline:
         time.sleep(3)
         status_url = f"{api['remote_sign_status']}?job={urllib.parse.quote(str(job_id))}&t={int(time.time() * 1000)}"
@@ -188,6 +188,9 @@ def run_once(force: bool = False) -> list:
             print(f"[Game Signer] ✅ Thành công: {res['manifest_url']}", flush=True)
         except Exception as e:
             print(f"[Game Signer] ❌ Thất bại ({cert['label']}): {e}", flush=True)
+            if existing:
+                servers.append(existing)
+            break
 
     cache_path = os.path.join(BASE_DIR, cfg["app"]["cache_file"])
     with open(cache_path, "w", encoding="utf-8") as f:

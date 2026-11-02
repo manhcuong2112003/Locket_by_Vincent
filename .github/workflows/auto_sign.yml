@@ -46,7 +46,6 @@ jobs:
         run: |
           python3 sign_locket.py
           python3 sign_game.py
-          python3 auto_sign_manager.py
 
       - name: Commit and Push updated manifests, cache & HTML
         run: |
