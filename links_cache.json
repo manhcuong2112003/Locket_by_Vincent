@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-03 17:29:45",
+  "updated_at": "2026-11-03 11:07:54",
   "last_error": null,
   "last_alert_sent_at": 0,
   "in_error_state": false,
@@ -59,7 +59,7 @@
       "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Locket-Widget-300x300.jpg",
       "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
       "source_page_url": "https://ipaomtk.com/locket-widget/download/",
-      "updated_at": "2026-11-03 17:29:45",
+      "updated_at": "2026-11-03 11:07:54",
       "servers": [
         {
           "cert_id": "main/Beihang University.zip",
