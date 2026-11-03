@@ -1,17 +1,18 @@
 {
   "app": {
     "id": "locket-widget",
-    "name": "Locket Gold",
-    "clone_name": "Locket Gold",
+    "name": "Locket Widget",
+    "clone_name": "Locket Widget",
     "category": "app",
-    "bundle_id": "com.locket.Locket",
-    "clone_bundle_id": "com.locket.Locket",
-    "appstore_url": "https://apps.apple.com/app/locket-widget/id1600525061",
-    "version": "2.71.0",
-    "size": "86.8 MB",
+    "bundle_id": "com.ipaomtk.auto.locketwidgetipaomtkcom",
+    "clone_bundle_id": "com.ipaomtk.auto.locketwidgetipaomtkcom",
+    "appstore_url": "https://apps.apple.com/vn/app/locket-widget/id1600525061",
+    "version": "2.71.1",
+    "size": "81.5 MB",
     "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
     "source_page_url": "https://ipaomtk.com/locket-widget/download/",
-    "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Locket-Widget-300x300.jpg",
+    "icon": "https://ipaomtk.com/ipaomtk-icon.png",
+    "display_icon": "./Shadowrocket – Cài đặt_files/locket-widget.png",
     "cache_file": "links_cache_locket.json",
     "shared_cache_file": "links_cache.json",
     "github_repo": "manhcuong2112003/Locket_by_Vincent",
@@ -20,10 +21,10 @@
   },
   "signing_spec": {
     "mode": "zsign_self_hosted",
-    "fixed_bundle_id": "com.locket.Locket",
+    "fixed_bundle_id": "com.ipaomtk.auto.locketwidgetipaomtkcom",
     "remove_plugins_appex": true,
+    "remove_gold_tweak": true,
     "preserve_tweaks": [
-      "AutoRcSideload.dylib",
       "blatantsPatch.dylib"
     ],
     "timeout_seconds": 240
@@ -40,8 +41,8 @@
     {
       "id": "main/Beihang University.zip",
       "slug": "beihang",
-      "label": "Server 1 — Beihang University (ZSign Gold)",
-      "badge": "Khuyên dùng • Locket Gold Chuẩn Bundle ID gốc",
+      "label": "Server 1 — Beihang University",
+      "badge": "Khuyên dùng • Bản chuẩn dễ tải",
       "p12": "certs/beihang/cert.p12",
       "mobileprovision": "certs/beihang/cert.mobileprovision",
       "password": "AppleP12.com"
@@ -49,8 +50,8 @@
     {
       "id": "main/RAKUTEN SECURITIES,INC.zip",
       "slug": "rakuten",
-      "label": "Server 2 — Rakuten Securities (ZSign Gold)",
-      "badge": "Ổn định • Locket Gold Chuẩn Bundle ID gốc",
+      "label": "Server 2 — Rakuten Securities",
+      "badge": "Ổn định • Bản chuẩn dễ tải",
       "p12": "certs/rakuten/cert.p12",
       "mobileprovision": "certs/rakuten/cert.mobileprovision",
       "password": "AppleP12.com"
@@ -58,8 +59,8 @@
     {
       "id": "main/China Telecom Corporation Limited.zip",
       "slug": "chinatelecom",
-      "label": "Server 3 — China Telecom (ZSign Gold)",
-      "badge": "Dự phòng • Locket Gold Chuẩn Bundle ID gốc",
+      "label": "Server 3 — China Telecom",
+      "badge": "Dự phòng • Bản chuẩn dễ tải",
       "p12": "certs/chinatelecom/cert.p12",
       "mobileprovision": "certs/chinatelecom/cert.mobileprovision",
       "password": "AppleP12.com"

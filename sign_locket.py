@@ -129,20 +129,27 @@ def prepare_clean_locket_gold_ipa(source_ipa_path: str, clean_ipa_path: str, cfg
             os.remove(bad_dylib)
             print("[Locket Patcher] ✔ Đã loại bỏ IPAOMTK-real.dylib thừa.")
 
-        # 3. Kiểm tra sự hiện diện của bộ đôi tweak Locket Gold + Sideload Fix
+        # 3. Kiểm tra hoặc gỡ bỏ AutoRcSideload.dylib nếu cấu hình remove_gold_tweak = true
         fw_dir = os.path.join(app_path, "Frameworks")
+        if cfg["signing_spec"].get("remove_gold_tweak", False):
+            gold_dylib = os.path.join(fw_dir, "AutoRcSideload.dylib")
+            if os.path.isfile(gold_dylib):
+                os.remove(gold_dylib)
+                print("[Locket Patcher] ✔ Đã gỡ bỏ AutoRcSideload.dylib (chuyển về bản Locket chuẩn, không Gold).")
+
         found_tweaks = []
         for tw in ("AutoRcSideload.dylib", "blatantsPatch.dylib"):
             if os.path.isfile(os.path.join(fw_dir, tw)):
                 found_tweaks.append(tw)
-        print(f"[Locket Patcher] ✔ Tweak tích hợp sẵn trong Frameworks: {', '.join(found_tweaks)}")
+        print(f"[Locket Patcher] ✔ Thư viện hỗ trợ giữ lại trong Frameworks: {', '.join(found_tweaks)}")
 
-        # 4. Đảm bảo Info.plist và GoogleService-Info.plist giữ nguyên com.locket.Locket
+        # 4. Đảm bảo Info.plist và GoogleService-Info.plist đồng bộ 100% cùng fixed_bundle_id
         info_plist_path = os.path.join(app_path, "Info.plist")
         if os.path.isfile(info_plist_path):
             with open(info_plist_path, "rb") as f:
                 info_data = plistlib.load(f)
             info_data["CFBundleIdentifier"] = fixed_bundle_id
+            info_data["CFBundleDisplayName"] = cfg["app"].get("name", "Locket")
             version_str = info_data.get("CFBundleShortVersionString", version_str)
             with open(info_plist_path, "wb") as f:
                 plistlib.dump(info_data, f)
@@ -155,14 +162,14 @@ def prepare_clean_locket_gold_ipa(source_ipa_path: str, clean_ipa_path: str, cfg
             with open(gs_plist_path, "wb") as f:
                 plistlib.dump(gs_data, f)
 
-        print(f"[Locket Patcher] ✔ Đã cố định Bundle ID gốc: {fixed_bundle_id} (v{version_str})")
+        print(f"[Locket Patcher] ✔ Đã đồng bộ Bundle ID chuẩn: {fixed_bundle_id} (v{version_str})")
 
         # 5. Đóng gói lại thành file IPA sạch để đưa vào zsign
         with zipfile.ZipFile(clean_ipa_path, "w", zipfile.ZIP_DEFLATED) as zout:
             for root, _, files in os.walk(tmpdir):
                 for file in files:
                     full_path = os.path.join(root, file)
-                    rel_path = os.path.relpath(full_path, tmpdir)
+                    rel_path = os.path.relpath(full_path, tmpdir).replace("\\", "/")
                     zout.write(full_path, rel_path)
 
     fix_ipa_unix_permissions(clean_ipa_path)
@@ -491,11 +498,16 @@ def sync_to_shared_portal(cfg: dict, servers: list) -> None:
             shared = json.load(f)
         app_id = cfg["app"]["id"]
         if "apps" in shared and app_id in shared["apps"]:
-            shared["apps"][app_id]["name"] = cfg["app"].get("name", "Locket Gold")
-            shared["apps"][app_id]["version"] = cfg["app"].get("version", "2.71.0")
+            shared["apps"][app_id]["name"] = cfg["app"].get("name", "Locket Widget")
+            shared["apps"][app_id]["version"] = cfg["app"].get("version", "2.71.1")
+            shared["apps"][app_id]["size"] = cfg["app"].get("size", "81.5 MB")
+            shared["apps"][app_id]["subtitle_vi"] = "Bản Locket Chuẩn (Chưa Gold) • Dễ tải & Ổn định"
+            shared["apps"][app_id]["subtitle_en"] = "Standard Clean Locket Build • Fast & Easy Install"
+            shared["apps"][app_id]["icon"] = cfg["app"].get("display_icon", "./Shadowrocket – Cài đặt_files/locket-widget.png")
             shared["apps"][app_id]["servers"] = servers
-            shared["apps"][app_id]["appstore_url"] = cfg["app"].get("appstore_url", "https://apps.apple.com/app/locket-widget/id1600525061")
+            shared["apps"][app_id]["appstore_url"] = cfg["app"].get("appstore_url", "https://apps.apple.com/vn/app/locket-widget/id1600525061")
             shared["apps"][app_id]["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            shared["servers"] = servers
             shared["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
             with open(shared_path, "w", encoding="utf-8") as f:
                 json.dump(shared, f, ensure_ascii=False, indent=2)
@@ -580,14 +592,9 @@ def run_once(force: bool = False) -> list:
                 except Exception as dl_err:
                     print(f"[Locket ZSign] ⚠️ Nguồn chính chặn IP đám mây ({dl_err}), chuyển sang tải bản Base sạch từ GitHub Release: {fallback_base_url}")
                     req_fb = urllib.request.Request(fallback_base_url, headers={"User-Agent": "Mozilla/5.0"})
-                    with urllib.request.urlopen(req_fb, timeout=180) as resp_fb, open(clean_ipa, "wb") as out_f:
+                    with urllib.request.urlopen(req_fb, timeout=180) as resp_fb, open(raw_ipa, "wb") as out_f:
                         shutil.copyfileobj(resp_fb, out_f)
-                    fix_ipa_unix_permissions(clean_ipa)
-                    clean_info = {
-                        "clean_ipa_path": clean_ipa,
-                        "bundle_id": fixed_bundle_id,
-                        "version": version
-                    }
+                    clean_info = prepare_clean_locket_gold_ipa(raw_ipa, clean_ipa, cfg)
 
                 for cert in missing_certs:
                     try:

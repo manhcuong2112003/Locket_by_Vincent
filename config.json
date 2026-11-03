@@ -1,37 +1,40 @@
 {
   "app": {
-    "name": "Locket Gold Portal",
+    "name": "Locket Portal",
     "version": "2.71.1",
     "dns_profile_url": "./Vincent-DNS.mobileconfig",
+    "nextdns_profile_url": "./NextDNS (d438ff).mobileconfig",
+    "appstore_url": "https://apps.apple.com/vn/app/locket-widget/id1600525061",
     "html_file": "index.html",
     "cache_file": "links_cache.json"
   },
   "catalog": [
     {
       "id": "locket-widget",
-      "name": "Locket Gold",
+      "name": "Locket Widget",
       "category": "app",
-      "bundle_id": "com.locket.Locket",
-      "tag_vi": "Mạng xã hội • Widget VIP",
-      "tag_en": "Social Widget VIP",
+      "bundle_id": "com.ipaomtk.auto.locketwidgetipaomtkcom",
+      "tag_vi": "Mạng xã hội • Bản gốc chuẩn",
+      "tag_en": "Social • Standard Clean Build",
       "version": "2.71.1",
-      "size": "82.0 MB",
-      "subtitle_vi": "Locket Gold Mở Khóa Sẵn • Ký Tự Chủ ZSign Chuẩn Bundle ID Gốc",
-      "subtitle_en": "Locket Gold Unlocked • Self-Hosted ZSign with Original Bundle ID",
+      "size": "81.5 MB",
+      "subtitle_vi": "Bản Locket Chuẩn (Đã gỡ Gold & Widget xung đột) • Tải nhanh & Ổn định",
+      "subtitle_en": "Standard Clean Locket Build • Fast & Easy Install",
       "features_vi": [
-        "Mở khóa sẵn tính năng Locket Gold (AutoRcSideload + blatantsPatch)",
-        "Giữ nguyên Bundle ID gốc com.locket.Locket chống văng ứng dụng",
-        "Ký đệ quy tự động bằng ZSign trên 3 Server chứng chỉ"
+        "Bản Locket chuẩn nhẹ, đã tách bỏ tweak Gold để ưu tiên cài đặt ổn định",
+        "Đồng bộ mã định danh độc lập, không xung đột với App Store trên iPhone",
+        "Hỗ trợ cả cài qua Server Chứng chỉ hoặc tải trực tiếp từ App Store / 3uTools"
       ],
       "features_en": [
-        "Pre-unlocked Locket Gold features (AutoRcSideload + blatantsPatch)",
-        "Preserves original com.locket.Locket Bundle ID for zero launch crashes",
-        "Recursively signed via ZSign across 3 Enterprise Certificate Servers"
+        "Clean standard Locket build for reliable installation",
+        "Independent Bundle ID to avoid App Store collision on iOS",
+        "Supports Enterprise Server OTA or direct App Store / 3uTools install"
       ],
-      "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Locket-Widget-300x300.jpg",
+      "icon": "./Shadowrocket – Cài đặt_files/locket-widget.png",
       "source_page_url": "https://ipaomtk.com/locket-widget/download/",
       "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
       "local_ipa_path": "",
+      "appstore_url": "https://apps.apple.com/vn/app/locket-widget/id1600525061",
       "fallback_3utools_plist": ""
     }
   ],
@@ -41,23 +44,23 @@
     "remote_sign_start": "https://signtools.ipaomtk.com/remote-sign-start.php",
     "remote_sign_status": "https://signtools.ipaomtk.com/remote-sign-status.php",
     "local_sign_merge": "https://signtools.ipaomtk.com/sign-merge.php",
-    "bundle_mode": "com.locket.Locket"
+    "bundle_mode": "com.ipaomtk.auto.locketwidgetipaomtkcom"
   },
   "preferred_certificates": [
     {
       "id": "main/Beihang University.zip",
-      "label": "Server 1 — Beihang University (ZSign Gold)",
-      "badge": "Khuyên dùng • Locket Gold Chuẩn Bundle ID gốc"
+      "label": "Server 1 — Beihang University",
+      "badge": "Khuyên dùng • Bản chuẩn dễ tải"
     },
     {
       "id": "main/RAKUTEN SECURITIES,INC.zip",
-      "label": "Server 2 — Rakuten Securities (ZSign Gold)",
-      "badge": "Ổn định • Locket Gold Chuẩn Bundle ID gốc"
+      "label": "Server 2 — Rakuten Securities",
+      "badge": "Ổn định • Bản chuẩn dễ tải"
     },
     {
       "id": "main/China Telecom Corporation Limited.zip",
-      "label": "Server 3 — China Telecom (ZSign Gold)",
-      "badge": "Dự phòng • Locket Gold Chuẩn Bundle ID gốc"
+      "label": "Server 3 — China Telecom",
+      "badge": "Dự phòng • Bản chuẩn dễ tải"
     }
   ],
   "email_alert": {

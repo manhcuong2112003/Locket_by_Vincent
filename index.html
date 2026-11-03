@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Locket Gold – Cài đặt iOS</title>
+<title>Locket Widget – Cài đặt iOS</title>
 <style>
   :root {
     --bg: #f0f4ff;
@@ -302,7 +302,7 @@
   }
   .btn:active { opacity: 0.85; transform: scale(0.98); }
 
-  /* Anti-Revoke DNS Button */
+  /* Anti-Revoke DNS & Secondary Buttons */
   .btn-dns {
     display: flex; align-items: center; justify-content: center; gap: 7px;
     width: 100%;
@@ -313,10 +313,16 @@
     font-size: 13px; font-weight: 700;
     padding: 11px 14px;
     border-radius: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 9px;
     transition: opacity 0.15s;
   }
   .btn-dns:active { opacity: 0.8; }
+
+  .btn-store {
+    background: var(--badge-bg);
+    border: 1px solid var(--srv-active-border);
+    color: var(--badge-text);
+  }
 
   /* Guide Box */
   .guide-box {
@@ -329,6 +335,7 @@
     color: var(--sub);
     line-height: 1.55;
     margin-bottom: 12px;
+    margin-top: 4px;
   }
   .guide-box strong { color: var(--text); }
 
@@ -356,7 +363,7 @@
     <span id="updated-time-label" style="font-weight: 500; font-size: 10.5px;">Auto-Sync</span>
   </div>
 
-  <!-- Danh sách App & Game -->
+  <!-- Danh sách App -->
   <div class="catalog-tabs" id="catalog-tabs"></div>
 
   <div class="divider"></div>
@@ -373,11 +380,11 @@
   <!-- Badge -->
   <div class="badge">
     <span class="badge-dot"></span>
-    <span id="app-badge-text">Sẵn sàng cài đặt • v2.2.92</span>
+    <span id="app-badge-text">Sẵn sàng cài đặt • v2.71.1</span>
   </div>
 
-  <div class="app-name" id="app-title">Shadowrocket</div>
-  <div class="app-sub" id="app-subtitle">Proxy &amp; VPN Utility • Không cần Apple ID &amp; PC</div>
+  <div class="app-name" id="app-title">Locket Widget</div>
+  <div class="app-sub" id="app-subtitle">Bản Locket Chuẩn (Chưa Gold) • Dễ tải &amp; Ổn định</div>
 
   <div class="divider"></div>
 
@@ -390,33 +397,45 @@
 
   <div class="server-list" id="server-list"></div>
 
-  <a class="btn" id="main-install-btn" href="itms-services://?action=download-manifest&url=https%3A%2F%2Fdl.3u.com%2Fplist%2F2026%2F09%2F08%2F1788829540721_622855.plist">
+  <a class="btn" id="main-install-btn" href="itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-beihang.plist">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
       <polyline points="7 10 12 15 17 10"></polyline>
       <line x1="12" y1="15" x2="12" y2="3"></line>
     </svg>
-    <span id="install-btn-text">Cài đặt Shadowrocket (v2.2.92)</span>
+    <span id="install-btn-text">Cài đặt Locket Widget (v2.71.1)</span>
+  </a>
+
+  <a class="btn-dns btn-store" id="appstore-install-btn" href="https://apps.apple.com/vn/app/locket-widget/id1600525061">
+    📲
+    <span class="vi" style="display: inline;">Tải Locket Gốc (App Store / 3uTools • Không cần Chứng chỉ)</span>
+    <span class="en" style="display: none;">Download Official Locket (App Store / 3uTools • No Cert Needed)</span>
   </a>
 
   <a class="btn-dns" id="dns-install-btn" href="./Vincent-DNS.mobileconfig">
     🛡️
-    <span class="vi" style="display: inline;">Cài Cấu Hình DNS Chống Thu Hồi Chứng Chỉ</span>
-    <span class="en" style="display: none;">Install Anti-Revoke DNS Profile</span>
+    <span class="vi" style="display: inline;">Cài Cấu Hình DNS Chống Thu Hồi Chứng Chỉ (Vincent-DNS)</span>
+    <span class="en" style="display: none;">Install Anti-Revoke DNS Profile (Vincent-DNS)</span>
+  </a>
+
+  <a class="btn-dns" id="nextdns-install-btn" href="./NextDNS%20(d438ff).mobileconfig">
+    ⚡
+    <span class="vi" style="display: inline;">Cài Cấu Hình NextDNS (d438ff • Chặn RevenueCat)</span>
+    <span class="en" style="display: none;">Install NextDNS Profile (d438ff • Block RevenueCat)</span>
   </a>
 
   <div class="guide-box">
     <div class="vi" style="display: inline;">
-      <strong>💡 Lưu ý khi cài đặt:</strong><br>
-      1. Với các Server ghi <strong>"Cần DNS"</strong>, hãy bấm nút <strong>🛡️ Cài Cấu Hình DNS Chống Thu Hồi</strong> và kích hoạt trong Cài đặt trước khi tải.<br>
-      2. Sau khi tải xong, vào <strong>Cài đặt → Cài đặt chung → Quản lý VPN &amp; Thiết bị</strong> → Bấm <strong>Tin cậy</strong> chứng chỉ doanh nghiệp.<br>
-      3. Nếu 1 Server báo không tải được trên máy bạn, hãy chạm chọn Server kế tiếp.
+      <strong>💡 Lưu ý khi cài đặt Locket:</strong><br>
+      1. <strong>Cách nhanh nhất (Không cần tin cậy chứng chỉ):</strong> Bấm nút <strong>📲 Tải Locket Gốc (App Store / 3uTools)</strong> hoặc tải từ 3uTools trên PC.<br>
+      2. <strong>Nếu cài qua Server 1 / 2 / 3 trên web:</strong> Hãy cài &amp; bật <strong>🛡️ Vincent-DNS</strong> trước khi tải, sau đó vào <strong>Cài đặt → Cài đặt chung → Quản lý VPN &amp; Thiết bị</strong> → Bấm <strong>Tin cậy</strong>.<br>
+      3. Cấu hình <strong>⚡ NextDNS (d438ff)</strong> dùng để chặn <code>api.revenuecat.com</code> sau khi bạn đã kích hoạt Locket.
     </div>
     <div class="en" style="display: none;">
       <strong>💡 Installation Notes:</strong><br>
-      1. For <strong>"Enterprise • Cần DNS"</strong> servers, install &amp; enable the <strong>🛡️ Anti-Revoke DNS Profile</strong> first.<br>
-      2. Go to <strong>Settings → General → VPN &amp; Device Management</strong> → Trust the Enterprise Certificate.<br>
-      3. If one server fails on your device, switch to the next server above.
+      1. <strong>Fastest way (No certificate trust needed):</strong> Tap <strong>📲 Download Official Locket</strong> or install via 3uTools.<br>
+      2. <strong>For Server 1 / 2 / 3 OTA:</strong> Enable <strong>🛡️ Vincent-DNS</strong> first, then trust the certificate in <strong>Settings → General → VPN &amp; Device Management</strong>.<br>
+      3. Use <strong>⚡ NextDNS (d438ff)</strong> to block <code>api.revenuecat.com</code>.
     </div>
   </div>
 
@@ -430,7 +449,7 @@
 </div>
 
 <script>
-  /*__SERVERS_DATA_START__*/const SIGN_DATA = {"updated_at": "2026-11-03 11:07:54", "dns_url": "./Vincent-DNS.mobileconfig", "fallback_3u_url": "", "apps": {"locket-widget": {"id": "locket-widget", "name": "Locket Gold", "category": "app", "tag_vi": "Mạng xã hội • Widget VIP", "tag_en": "Social Widget VIP", "version": "2.71.0", "size": "82.0 MB", "subtitle_vi": "Locket Gold Mở Khóa Sẵn • Ký Tự Chủ ZSign Chuẩn Bundle ID Gốc", "subtitle_en": "Locket Gold Unlocked • Self-Hosted ZSign with Original Bundle ID", "features_vi": ["Mở khóa sẵn tính năng Locket Gold (AutoRcSideload + blatantsPatch)", "Giữ nguyên Bundle ID gốc com.locket.Locket chống văng ứng dụng", "Ký đệ quy tự động bằng ZSign trên 3 Server chứng chỉ"], "features_en": ["Pre-unlocked Locket Gold features (AutoRcSideload + blatantsPatch)", "Preserves original com.locket.Locket Bundle ID for zero launch crashes", "Recursively signed via ZSign across 3 Enterprise Certificate Servers"], "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Locket-Widget-300x300.jpg", "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa", "source_page_url": "https://ipaomtk.com/locket-widget/download/", "updated_at": "2026-11-03 11:07:54", "servers": [{"cert_id": "main/Beihang University.zip", "label": "Server 1 — Beihang University (ZSign Gold)", "badge": "Khuyên dùng • Locket Gold Chuẩn Bundle ID gốc", "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-beihang.plist", "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-beihang.plist", "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-beihang.ipa", "signed_at": "2026-11-03 17:24:31", "status": "active"}, {"cert_id": "main/RAKUTEN SECURITIES,INC.zip", "label": "Server 2 — Rakuten Securities (ZSign Gold)", "badge": "Ổn định • Locket Gold Chuẩn Bundle ID gốc", "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-rakuten.plist", "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-rakuten.plist", "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-rakuten.ipa", "signed_at": "2026-11-03 17:24:51", "status": "active"}, {"cert_id": "main/China Telecom Corporation Limited.zip", "label": "Server 3 — China Telecom (ZSign Gold)", "badge": "Dự phòng • Locket Gold Chuẩn Bundle ID gốc", "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-chinatelecom.plist", "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-chinatelecom.plist", "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-chinatelecom.ipa", "signed_at": "2026-11-03 17:25:11", "status": "active"}], "appstore_url": "https://apps.apple.com/app/locket-widget/id1600525061"}}, "servers": [{"cert_id": "main/Beihang University.zip", "label": "Server 1 — Beihang University (ZSign Gold)", "badge": "Khuyên dùng • Locket Gold Chuẩn Bundle ID gốc", "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-beihang.plist", "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-beihang.plist", "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-beihang.ipa", "signed_at": "2026-11-03 17:24:31", "status": "active"}, {"cert_id": "main/RAKUTEN SECURITIES,INC.zip", "label": "Server 2 — Rakuten Securities (ZSign Gold)", "badge": "Ổn định • Locket Gold Chuẩn Bundle ID gốc", "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-rakuten.plist", "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-rakuten.plist", "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-rakuten.ipa", "signed_at": "2026-11-03 17:24:51", "status": "active"}, {"cert_id": "main/China Telecom Corporation Limited.zip", "label": "Server 3 — China Telecom (ZSign Gold)", "badge": "Dự phòng • Locket Gold Chuẩn Bundle ID gốc", "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-chinatelecom.plist", "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-chinatelecom.plist", "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-chinatelecom.ipa", "signed_at": "2026-11-03 17:25:11", "status": "active"}]};/*__SERVERS_DATA_END__*/
+  /*__SERVERS_DATA_START__*/const SIGN_DATA = {"updated_at": "2026-11-03 19:36:46", "dns_url": "./Vincent-DNS.mobileconfig", "fallback_3u_url": "", "apps": {"locket-widget": {"id": "locket-widget", "name": "Locket Widget", "category": "app", "tag_vi": "Mạng xã hội • Widget VIP", "tag_en": "Social Widget VIP", "version": "2.71.1", "size": "81.5 MB", "subtitle_vi": "Bản Locket Chuẩn (Chưa Gold) • Dễ tải & Ổn định", "subtitle_en": "Standard Clean Locket Build • Fast & Easy Install", "features_vi": ["Mở khóa sẵn tính năng Locket Gold (AutoRcSideload + blatantsPatch)", "Giữ nguyên Bundle ID gốc com.locket.Locket chống văng ứng dụng", "Ký đệ quy tự động bằng ZSign trên 3 Server chứng chỉ"], "features_en": ["Pre-unlocked Locket Gold features (AutoRcSideload + blatantsPatch)", "Preserves original com.locket.Locket Bundle ID for zero launch crashes", "Recursively signed via ZSign across 3 Enterprise Certificate Servers"], "icon": "./Shadowrocket – Cài đặt_files/locket-widget.png", "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa", "source_page_url": "https://ipaomtk.com/locket-widget/download/", "updated_at": "2026-11-03 19:36:46", "servers": [{"cert_id": "main/Beihang University.zip", "label": "Server 1 — Beihang University", "badge": "Khuyên dùng • Bản chuẩn dễ tải", "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-beihang.plist", "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-beihang.plist", "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-beihang.ipa", "signed_at": "2026-11-03 19:36:15", "status": "active"}, {"cert_id": "main/RAKUTEN SECURITIES,INC.zip", "label": "Server 2 — Rakuten Securities", "badge": "Ổn định • Bản chuẩn dễ tải", "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-rakuten.plist", "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-rakuten.plist", "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-rakuten.ipa", "signed_at": "2026-11-03 19:36:31", "status": "active"}, {"cert_id": "main/China Telecom Corporation Limited.zip", "label": "Server 3 — China Telecom", "badge": "Dự phòng • Bản chuẩn dễ tải", "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-chinatelecom.plist", "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-chinatelecom.plist", "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-chinatelecom.ipa", "signed_at": "2026-11-03 19:36:46", "status": "active"}], "appstore_url": "https://apps.apple.com/vn/app/locket-widget/id1600525061"}}, "servers": [{"cert_id": "main/Beihang University.zip", "label": "Server 1 — Beihang University", "badge": "Khuyên dùng • Bản chuẩn dễ tải", "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-beihang.plist", "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-beihang.plist", "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-beihang.ipa", "signed_at": "2026-11-03 19:36:15", "status": "active"}, {"cert_id": "main/RAKUTEN SECURITIES,INC.zip", "label": "Server 2 — Rakuten Securities", "badge": "Ổn định • Bản chuẩn dễ tải", "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-rakuten.plist", "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-rakuten.plist", "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-rakuten.ipa", "signed_at": "2026-11-03 19:36:31", "status": "active"}, {"cert_id": "main/China Telecom Corporation Limited.zip", "label": "Server 3 — China Telecom", "badge": "Dự phòng • Bản chuẩn dễ tải", "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-chinatelecom.plist", "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-chinatelecom.plist", "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-chinatelecom.ipa", "signed_at": "2026-11-03 19:36:46", "status": "active"}]};/*__SERVERS_DATA_END__*/
 
   let currentLang = 'vi';
   let selectedAppId = 'locket-widget';
@@ -443,11 +462,11 @@
     }
     return [{
       id: 'locket-widget',
-      name: 'Shadowrocket',
+      name: 'Locket Widget',
       category: 'app',
-      version: '2.2.92',
-      subtitle_vi: 'Proxy & VPN Utility • Không cần Apple ID & PC',
-      subtitle_en: 'Proxy & VPN Utility • No Apple ID or PC required',
+      version: '2.71.1',
+      subtitle_vi: 'Bản Locket Chuẩn (Chưa Gold) • Dễ tải & Ổn định',
+      subtitle_en: 'Standard Clean Locket Build • Fast & Easy Install',
       icon: './Shadowrocket – Cài đặt_files/locket-widget.png',
       servers: (activeData && activeData.servers) ? activeData.servers : []
     }];
@@ -486,7 +505,7 @@
     const logoSvg = document.getElementById('logo-svg');
     logoSvg.style.display = 'none';
     logoImg.style.display = 'inline-block';
-    logoImg.src = currentApp.icon;
+    logoImg.src = currentApp.display_icon || currentApp.icon || './Shadowrocket – Cài đặt_files/locket-widget.png';
 
     document.getElementById('app-title').textContent = currentApp.name;
     document.getElementById('app-subtitle').textContent =
@@ -519,6 +538,10 @@
 
     document.getElementById('install-btn-text').textContent =
       (currentLang === 'vi' ? 'Cài đặt ' : 'Install ') + currentApp.name + ' (v' + currentApp.version + ')';
+
+    if (currentApp.appstore_url && document.getElementById('appstore-install-btn')) {
+      document.getElementById('appstore-install-btn').href = currentApp.appstore_url;
+    }
 
     if (activeData && activeData.dns_url) {
       document.getElementById('dns-install-btn').href = activeData.dns_url;
