@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-03 17:25:11",
+  "updated_at": "2026-11-03 17:29:45",
   "last_error": null,
   "last_alert_sent_at": 0,
   "in_error_state": false,
@@ -42,7 +42,7 @@
       "category": "app",
       "tag_vi": "Mạng xã hội • Widget VIP",
       "tag_en": "Social Widget VIP",
-      "version": "2.71.1",
+      "version": "2.71.0",
       "size": "82.0 MB",
       "subtitle_vi": "Locket Gold Mở Khóa Sẵn • Ký Tự Chủ ZSign Chuẩn Bundle ID Gốc",
       "subtitle_en": "Locket Gold Unlocked • Self-Hosted ZSign with Original Bundle ID",
@@ -59,7 +59,7 @@
       "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Locket-Widget-300x300.jpg",
       "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
       "source_page_url": "https://ipaomtk.com/locket-widget/download/",
-      "updated_at": "2026-11-03 17:25:11",
+      "updated_at": "2026-11-03 17:29:45",
       "servers": [
         {
           "cert_id": "main/Beihang University.zip",
