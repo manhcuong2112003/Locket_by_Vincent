@@ -1,13 +1,16 @@
 #!name=Locket Gold & 30s Video
-#!desc=Mở khóa Locket Gold và mở rộng thời lượng quay video lên 30s.
+#!desc=Mở khóa Locket Gold và mở rộng thời lượng quay video lên 30s (có âm thanh).
 #!author=Vincent
 
 [Script]
+# Xóa cache ETag / If-None-Match để ép RevenueCat và Firebase trả về toàn bộ dữ liệu mới
+deleteHeader = type=http-request,pattern=^https:\/\/(api\.revenuecat\.com|firebaseremoteconfig\.googleapis\.com)\/.+,script-path=https://raw.githubusercontent.com/manhcuong2112003/Locket_by_Vincent/main/deleteHeader.js,timeout=60
+
+# Mở khóa Locket Gold qua RevenueCat
 revenuecat = type=http-response,pattern=^https:\/\/api\.revenuecat\.com\/.+\/(receipts$|subscribers\/[^\/]+$),script-path=https://raw.githubusercontent.com/manhcuong2112003/Locket_by_Vincent/main/locket_gold_30s.js,requires-body=true,max-size=-1,timeout=60
 
-deleteHeader = type=http-request,pattern=^https:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers),script-path=https://raw.githubusercontent.com/manhcuong2112003/Locket_by_Vincent/main/deleteHeader.js,timeout=60
-
-locketConfig = type=http-response,pattern=^https?:\/\/api\.locketcamera\.com\/.*,script-path=https://raw.githubusercontent.com/manhcuong2112003/Locket_by_Vincent/main/locket_gold_30s.js,requires-body=true,max-size=-1,timeout=60
+# Mở khóa Video 30s & Đăng tải từ thư viện qua Firebase Remote Config
+locket30s = type=http-response,pattern=^https:\/\/firebaseremoteconfig\.googleapis\.com\/.+,script-path=https://raw.githubusercontent.com/manhcuong2112003/Locket_by_Vincent/main/locket_30s.js,requires-body=true,max-size=-1,timeout=60
 
 [MITM]
-hostname = %APPEND% api.revenuecat.com, api.locketcamera.com
+hostname = %APPEND% api.revenuecat.com, firebaseremoteconfig.googleapis.com
