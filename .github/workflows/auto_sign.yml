@@ -44,7 +44,11 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
         run: |
-          python3 sign_locket.py
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python3 sign_locket.py --force
+          else
+            python3 sign_locket.py
+          fi
           python3 sign_game.py
 
       - name: Commit and Push updated manifests, cache & HTML

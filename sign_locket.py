@@ -20,6 +20,7 @@ import os
 import plistlib
 import re
 import shutil
+import struct
 import subprocess
 import tempfile
 import time
@@ -164,6 +165,7 @@ def prepare_clean_locket_gold_ipa(source_ipa_path: str, clean_ipa_path: str, cfg
                     rel_path = os.path.relpath(full_path, tmpdir)
                     zout.write(full_path, rel_path)
 
+    fix_ipa_unix_permissions(clean_ipa_path)
     return {
         "clean_ipa_path": clean_ipa_path,
         "bundle_id": fixed_bundle_id,
@@ -318,6 +320,52 @@ def upload_to_github_release(signed_ipa_path: str, release_tag: str, repo: str) 
     return f"https://github.com/{repo}/releases/download/{release_tag}/{asset_name}"
 
 
+def fix_ipa_unix_permissions(ipa_path: str) -> None:
+    """
+    Sửa trực tiếp bảng Central Directory của file .ipa để đảm bảo 100% chuẩn quyền Unix (0755/0644) cho iOS installd:
+    - Khi đóng gói hoặc chạy zsign trên Windows, thuộc tính Unix mode trong ZIP bị về 0o0 (MS-DOS),
+      khiến iOS từ chối hoàn tất cài đặt ở 99% và không đăng ký chứng chỉ vào Quản lý VPN & Thiết bị.
+    - Hàm này đặt version_made_by = 0x0314 (Unix) và external_attr = 0o100755 cho toàn bộ file thực thi Mach-O / .dylib.
+    """
+    with open(ipa_path, "rb") as f:
+        buf = bytearray(f.read())
+
+    eocd_idx = buf.rfind(b"PK\x05\x06")
+    if eocd_idx == -1:
+        return
+
+    cd_size, cd_offset = struct.unpack_from("<II", buf, eocd_idx + 12)
+    pos = cd_offset
+    end = cd_offset + cd_size
+    exec_count = 0
+
+    while pos < end and buf[pos:pos + 4] == b"PK\x01\x02":
+        fname_len, extra_len, comment_len = struct.unpack_from("<HHH", buf, pos + 28)
+        fname = buf[pos + 46:pos + 46 + fname_len].decode("utf-8", errors="ignore")
+
+        # Đặt hệ tạo file = Unix (3) + ZIP 2.0 (20 -> 0x14) => 0x0314
+        struct.pack_into("<H", buf, pos + 4, 0x0314)
+
+        if fname.endswith("/"):
+            ext_attr = (0o040755 << 16) | 0x10
+        elif (
+            fname == "Payload/Locket.app/Locket"
+            or fname.endswith(".dylib")
+            or re.search(r"\.framework/[^/.]+$", fname)
+        ):
+            ext_attr = 0o100755 << 16
+            exec_count += 1
+        else:
+            ext_attr = 0o100644 << 16
+
+        struct.pack_into("<I", buf, pos + 38, ext_attr)
+        pos += 46 + fname_len + extra_len + comment_len
+
+    with open(ipa_path, "wb") as f:
+        f.write(buf)
+    print(f"[Locket ZSign] ✔ Đã chuẩn hóa quyền thực thi Unix (chmod 0755) cho {exec_count} binary/dylib trong {os.path.basename(ipa_path)}")
+
+
 def sign_with_zsign(
     clean_info: dict,
     cert: dict,
@@ -350,6 +398,8 @@ def sign_with_zsign(
     res = subprocess.run(cmd, capture_output=True, text=True)
     if res.returncode != 0 or not os.path.isfile(signed_ipa_path):
         raise RuntimeError(f"zsign thất bại ({res.returncode}): {res.stderr or res.stdout}")
+
+    fix_ipa_unix_permissions(signed_ipa_path)
 
     repo = cfg["app"].get("github_repo", "manhcuong2112003/Locket_by_Vincent")
     release_tag = cfg["app"].get("release_tag", "v1.0-signed")
@@ -532,6 +582,7 @@ def run_once(force: bool = False) -> list:
                     req_fb = urllib.request.Request(fallback_base_url, headers={"User-Agent": "Mozilla/5.0"})
                     with urllib.request.urlopen(req_fb, timeout=180) as resp_fb, open(clean_ipa, "wb") as out_f:
                         shutil.copyfileobj(resp_fb, out_f)
+                    fix_ipa_unix_permissions(clean_ipa)
                     clean_info = {
                         "clean_ipa_path": clean_ipa,
                         "bundle_id": fixed_bundle_id,
