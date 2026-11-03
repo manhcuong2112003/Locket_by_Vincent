@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "Locket & Game Portal",
-    "version": "2.70.0",
+    "name": "Locket Gold Portal",
+    "version": "2.71.1",
     "dns_profile_url": "./Vincent-DNS.mobileconfig",
     "html_file": "index.html",
     "cache_file": "links_cache.json"
@@ -9,54 +9,28 @@
   "catalog": [
     {
       "id": "locket-widget",
-      "name": "Locket Widget",
+      "name": "Locket Gold",
       "category": "app",
       "bundle_id": "com.locket.Locket",
-      "tag_vi": "Mạng xã hội • Widget",
-      "tag_en": "Social Widget",
-      "version": "2.70.0",
-      "size": "86.8 MB",
-      "subtitle_vi": "Widget Ảnh Bạn Bè • Chia sẻ khoảnh khắc lên Màn hình chính",
-      "subtitle_en": "Live Photo Home Screen Widget • Pre-signed for iOS",
+      "tag_vi": "Mạng xã hội • Widget VIP",
+      "tag_en": "Social Widget VIP",
+      "version": "2.71.1",
+      "size": "82.0 MB",
+      "subtitle_vi": "Locket Gold Mở Khóa Sẵn • Ký Tự Chủ ZSign Chuẩn Bundle ID Gốc",
+      "subtitle_en": "Locket Gold Unlocked • Self-Hosted ZSign with Original Bundle ID",
       "features_vi": [
-        "Gửi ảnh trực tiếp lên Widget Màn hình chính của bạn bè và người thân",
-        "Đã ký sẵn trên 3 Server chứng chỉ + Hỗ trợ tải file IPA gốc",
-        "Tự động phát hiện và ký lại khi Locket ra bản cập nhật mới"
+        "Mở khóa sẵn tính năng Locket Gold (AutoRcSideload + blatantsPatch)",
+        "Giữ nguyên Bundle ID gốc com.locket.Locket chống văng ứng dụng",
+        "Ký đệ quy tự động bằng ZSign trên 3 Server chứng chỉ"
       ],
       "features_en": [
-        "Share live photos directly to friends' iPhone Home Screen widgets",
-        "Pre-signed across 3 Certificate Servers + Direct IPA download",
-        "Automatically detects and re-signs new Locket releases"
+        "Pre-unlocked Locket Gold features (AutoRcSideload + blatantsPatch)",
+        "Preserves original com.locket.Locket Bundle ID for zero launch crashes",
+        "Recursively signed via ZSign across 3 Enterprise Certificate Servers"
       ],
       "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Locket-Widget-300x300.jpg",
       "source_page_url": "https://ipaomtk.com/locket-widget/download/",
       "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
-      "local_ipa_path": "",
-      "fallback_3utools_plist": ""
-    },
-    {
-      "id": "asphalt-8",
-      "name": "Asphalt 8 Airborne",
-      "category": "game",
-      "tag_vi": "Game Đua Xe",
-      "tag_en": "Racing Game",
-      "version": "9.2.0",
-      "size": "2.82 GB",
-      "subtitle_vi": "Game Đua Xe Siêu Phẩm 3D • Đã ký sẵn cho iOS",
-      "subtitle_en": "Blockbuster 3D Arcade Racing • Pre-signed for iOS",
-      "features_vi": [
-        "Đồ họa 3D tốc độ cao với hơn 300 siêu xe & mô tô bản quyền",
-        "Đã ký sẵn trên 3 Server không tốn băng thông máy cá nhân",
-        "Hỗ trợ cài trực tiếp qua Safari hoặc tải file IPA"
-      ],
-      "features_en": [
-        "High-octane 3D arcade racing with 300+ licensed vehicles",
-        "Pre-signed across 3 servers with zero local bandwidth",
-        "Direct Safari OTA install or raw IPA file download"
-      ],
-      "icon": "https://ipaomtk.com/wp-content/uploads/2023/03/Asphalt-8-Airborne--300x300.jpg",
-      "source_page_url": "https://ipaomtk.com/asphalt-8-ipa/download/",
-      "remote_ipa_url": "https://file.ipaomtk.com/Asphalt-8-Airborne/Asphalt-8-IPAOMTK.COM.ipa",
       "local_ipa_path": "",
       "fallback_3utools_plist": ""
     }
@@ -67,28 +41,23 @@
     "remote_sign_start": "https://signtools.ipaomtk.com/remote-sign-start.php",
     "remote_sign_status": "https://signtools.ipaomtk.com/remote-sign-status.php",
     "local_sign_merge": "https://signtools.ipaomtk.com/sign-merge.php",
-    "bundle_mode": "com.ipaomtk.auto"
+    "bundle_mode": "com.locket.Locket"
   },
   "preferred_certificates": [
     {
-      "id": "main/China Telecom Corporation Limited.zip",
-      "label": "Server 1 — China Telecom (Full VPN)",
-      "badge": "Khuyên dùng • Hỗ trợ VPN"
+      "id": "main/Beihang University.zip",
+      "label": "Server 1 — Beihang University (ZSign Gold)",
+      "badge": "Khuyên dùng • Locket Gold Chuẩn Bundle ID gốc"
     },
     {
       "id": "main/RAKUTEN SECURITIES,INC.zip",
-      "label": "Server 2 — Rakuten Securities",
-      "badge": "Mặc định • Ổn định"
+      "label": "Server 2 — Rakuten Securities (ZSign Gold)",
+      "badge": "Ổn định • Locket Gold Chuẩn Bundle ID gốc"
     },
     {
-      "id": "main/HSBC Bank plc.zip",
-      "label": "Server 3 — HSBC Bank Plc",
-      "badge": "Dự phòng 1 • Hạn 05/2027"
-    },
-    {
-      "id": "main/Beihang University.zip",
-      "label": "Server 4 — Beihang University",
-      "badge": "Dự phòng 2 • Hạn 12/2026"
+      "id": "main/China Telecom Corporation Limited.zip",
+      "label": "Server 3 — China Telecom (ZSign Gold)",
+      "badge": "Dự phòng • Locket Gold Chuẩn Bundle ID gốc"
     }
   ],
   "email_alert": {

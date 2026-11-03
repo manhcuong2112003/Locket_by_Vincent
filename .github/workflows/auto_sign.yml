@@ -1,9 +1,9 @@
-name: Auto-Sign & Health Check iOS Portal (Game & Locket Gold ZSign)
+name: Auto-Sign & Health Check Locket Gold (ZSign)
 
 on:
   schedule:
     # Tự động chạy mỗi 30 phút trên máy chủ GitHub (24/7 kể cả khi tắt PC)
-    - cron: "*/30 * * * *"
+    - cron: '*/30 * * * *'
   workflow_dispatch: # Cho phép bấm chạy thủ công ngay trên tab Actions
 
 permissions:
@@ -25,7 +25,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
 
       - name: Install prebuilt zsign v1.1.3
         run: |
@@ -37,7 +37,7 @@ jobs:
         run: |
           git pull --rebase origin main || true
 
-      - name: Run Self-Hosted ZSign Locket Gold & Game Signer
+      - name: Run Self-Hosted ZSign Locket Gold Signer
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
@@ -49,7 +49,6 @@ jobs:
           else
             python3 sign_locket.py
           fi
-          python3 sign_game.py
 
       - name: Commit and Push updated manifests, cache & HTML
         run: |
