@@ -1,14 +1,29 @@
-// deleteHeader.js - Xóa cache ETag để ép RevenueCat và Firebase trả về JSON mới
-var modifiedHeaders = $request.headers;
+// deleteHeader.js - Xóa ETag / If-None-Match để ép RevenueCat và Firebase luôn trả về HTTP 200 kèm JSON mới nhất
+function setHeaderValue(headers, key, value) {
+    const lowerKey = key.toLowerCase();
+    for (let k in headers) {
+        if (k.toLowerCase() === lowerKey) {
+            headers[k] = value;
+        }
+    }
+    headers[key] = value;
+}
 
-delete modifiedHeaders["x-revenuecat-etag"];
-delete modifiedHeaders["X-RevenueCat-ETag"];
-delete modifiedHeaders["if-none-match"];
-delete modifiedHeaders["If-None-Match"];
-delete modifiedHeaders["if-modified-since"];
-delete modifiedHeaders["If-Modified-Since"];
+var modifiedHeaders = $request.headers || {};
 
-modifiedHeaders["Cache-Control"] = "no-cache";
-modifiedHeaders["Pragma"] = "no-cache";
+const headersToModify = {
+    "X-RevenueCat-ETag": "",
+    "x-revenuecat-etag": "",
+    "If-None-Match": "",
+    "if-none-match": "",
+    "If-Modified-Since": "",
+    "if-modified-since": "",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache"
+};
+
+for (let key in headersToModify) {
+    setHeaderValue(modifiedHeaders, key, headersToModify[key]);
+}
 
 $done({ headers: modifiedHeaders });
