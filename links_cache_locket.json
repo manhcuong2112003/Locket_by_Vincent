@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-05 15:41:19",
+  "updated_at": "2026-11-05 21:39:14",
   "app": {
     "id": "locket-widget",
     "name": "Locket Widget",
@@ -22,16 +22,6 @@
   },
   "servers": [
     {
-      "cert_id": "main/China Telecom Corporation Limited.zip",
-      "label": "Server 3 — China Telecom",
-      "badge": "Dự phòng • Bản chuẩn dễ tải",
-      "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-chinatelecom.plist",
-      "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-chinatelecom.plist",
-      "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-chinatelecom.ipa",
-      "signed_at": "2026-11-03 19:36:46",
-      "status": "active"
-    },
-    {
       "cert_id": "main/Beihang University.zip",
       "label": "Server 1 — Beihang University",
       "badge": "Khuyên dùng • Bản chuẩn dễ tải",
@@ -49,6 +39,16 @@
       "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-rakuten.plist",
       "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-rakuten.ipa",
       "signed_at": "2026-11-05 15:41:19",
+      "status": "active"
+    },
+    {
+      "cert_id": "main/China Telecom Corporation Limited.zip",
+      "label": "Server 3 — China Telecom",
+      "badge": "Dự phòng • Bản chuẩn dễ tải",
+      "manifest_url": "https://manhcuong2112003.github.io/Locket_by_Vincent/manifests/locket-chinatelecom.plist",
+      "install_url": "itms-services://?action=download-manifest&url=https%3A%2F%2Fmanhcuong2112003.github.io%2FLocket_by_Vincent%2Fmanifests%2Flocket-chinatelecom.plist",
+      "ipa_url": "https://github.com/manhcuong2112003/Locket_by_Vincent/releases/download/v1.0-signed/LocketGold-chinatelecom.ipa",
+      "signed_at": "2026-11-03 19:36:46",
       "status": "active"
     }
   ]
