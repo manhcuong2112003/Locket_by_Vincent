@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-10 23:54:59",
+  "updated_at": "2026-11-11 03:31:52",
   "last_error": null,
   "last_alert_sent_at": 0,
   "in_error_state": false,
@@ -59,7 +59,7 @@
       "icon": "./Shadowrocket – Cài đặt_files/locket-widget.png",
       "remote_ipa_url": "https://file.ipaomtk.com/Locket-Widget/Locket-Widget-IPAOMTK.com.ipa",
       "source_page_url": "https://ipaomtk.com/locket-widget/download/",
-      "updated_at": "2026-11-10 23:54:59",
+      "updated_at": "2026-11-11 03:31:52",
       "servers": [
         {
           "cert_id": "main/Beihang University.zip",
